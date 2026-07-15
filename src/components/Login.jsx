@@ -57,25 +57,24 @@ const handleGoogleLogin = async () => {
     console.log("Firebase ID Token:", idToken);
 
     // Send token to backend
-    const response = await fetch("http://localhost:5000/api/auth/google-login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        idToken,
-      }),
+    const response = await API.post("/google-login", {
+      idToken,
     });
 
-    const data = await response.json();
+    console.log(response.data);
 
-    console.log(data);
+    localStorage.setItem("token", response.data.token);
 
-    alert(data.message);
+    alert(response.data.message);
 
   } catch (error) {
     console.error(error);
-    alert(error.message);
+
+    alert(
+      error.response?.data?.message ||
+      error.message ||
+      "Google Login Failed"
+    );
   }
 };
 
