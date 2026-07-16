@@ -135,7 +135,7 @@ const handleGoogleLogin = async () => {
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm"
+                  className="w-full bg-transparent outline-none text-sm text-black"
                 />
               </div>
             </div>
@@ -150,7 +150,7 @@ const handleGoogleLogin = async () => {
                   placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm"
+                  className="w-full bg-transparent outline-none text-sm text-black"
                 />
                 <button
                   type="button"

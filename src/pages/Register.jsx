@@ -118,7 +118,7 @@ export default function Register() {
                   placeholder="Enter your full name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm"
+                  className="w-full bg-transparent outline-none text-sm text-black"
                 />
               </div>
             </div>
@@ -133,7 +133,7 @@ export default function Register() {
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm"
+                  className="w-full bg-transparent outline-none text-sm text-black"
                 />
               </div>
             </div>
@@ -150,7 +150,7 @@ export default function Register() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm"
+                  className="w-full bg-transparent outline-none text-sm text-black"
                 />
                 <button
                   type="button"
@@ -177,7 +177,7 @@ export default function Register() {
                   placeholder="Confirm Password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm"
+                  className="w-full bg-transparent outline-none text-sm text-black"
                 />
                 <button
                   type="button"
