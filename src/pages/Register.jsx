@@ -222,7 +222,7 @@ export default function Register() {
             <p className="text-center mt-5 text-sm text-gray-600">
               Already have an account?
               <Link
-                to="/"
+                to="/login/candidate"
                 className="text-blue-700 font-semibold ml-2 hover:underline"
               >
                 Login
