@@ -83,6 +83,7 @@ setTimeout(() => {
         sender: "bot",
         type: "text",
         text: reply,
+        time: getCurrentTime(),
       },
     ]);
 
