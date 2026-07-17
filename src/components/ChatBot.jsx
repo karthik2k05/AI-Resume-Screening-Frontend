@@ -1,5 +1,12 @@
-import { useState } from "react";
-import { FaRobot, FaTimes, FaPaperPlane } from "react-icons/fa";
+import SupportCard from "./SupportCard";
+import { getBotReply } from "../utils/chatbotEngine";
+import { useState, useEffect, useRef } from "react";
+import {
+  FaRobot,
+  FaTimes,
+  FaPaperPlane,
+  FaTrash,
+} from "react-icons/fa";
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -7,89 +14,103 @@ export default function ChatBot() {
     {
       sender: "bot",
       text: "👋 Hi! I'm ResumeIQ AI Assistant. How can I help you today?",
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }), 
     },
   ]);
+
   const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef(null);
+    useEffect(() => {
+  messagesEndRef.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+}, [messages, isTyping]);
+  const suggestions = [
+  "What is ATS?",
+  "How do I register?",
+  "contact admin",
+  "How do I upload my resume?",
+  "What technologies are used?",
+];
+const getCurrentTime = () => {
+  return new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+  const sendMessage = async () => {
+  if (!input.trim()) return;
 
-  const getBotReply = (message) => {
-  const msg = message.toLowerCase();
+  const userMessage = {
+    sender: "user",
+    text: input,
+    time: getCurrentTime(),
+  };
+ 
 
-  // Greetings
-  if (msg.includes("hi") || msg.includes("hello") || msg.includes("hey"))
-    return "👋 Hello! Welcome to ResumeIQ. How can I assist you today?";
+  setMessages((prev) => [...prev, userMessage]);
 
-  // Registration
-  if (msg.includes("register") || msg.includes("signup") || msg.includes("sign up"))
-    return "Click the Register button and fill in your name, email, and password to create your account.";
+  const userInput = input;
+  setInput("");
 
-  // Login
-  if (msg.includes("login") || msg.includes("log in"))
-    return "You can login using your registered email & password or continue with Google.";
+  // Show typing indicator
+  setIsTyping(true);
 
-  // Google Login
-  if (msg.includes("google"))
-    return "ResumeIQ supports secure Google Sign-In using Firebase Authentication.";
+  const reply = await getBotReply(userInput);
 
-  // Resume
-  if (msg.includes("resume") || msg.includes("upload"))
-    return "After logging in, you can upload your resume in PDF format for AI analysis.";
+// Small delay to make it feel natural
+setTimeout(() => {
 
-  // ATS
-  if (msg.includes("ats") || msg.includes("score"))
-    return "Our AI compares your resume with job requirements and generates an ATS compatibility score.";
+  if (reply === "__SUPPORT__") {
 
-  // Jobs
-  if (msg.includes("job") || msg.includes("apply"))
-    return "After logging in, you can browse available jobs and apply to the ones that match your skills.";
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "bot",
+        type: "support",
+      },
+    ]);
 
-  // HR
-  if (msg.includes("hr"))
-    return "HR can post jobs, review candidates, shortlist applicants, and view ATS scores.";
+  } else {
 
-  // Admin
-  if (msg.includes("admin"))
-    return "The Admin manages users, HR accounts, jobs, and overall platform statistics.";
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "bot",
+        type: "text",
+        text: reply,
+      },
+    ]);
 
-  // Password
-  if (msg.includes("password"))
-    return "If you've forgotten your password, please use the Forgot Password option once it becomes available.";
+  }
 
-  // Contact
-  if (msg.includes("contact") || msg.includes("support"))
-    return "For additional assistance, please contact the ResumeIQ support team.";
+  setIsTyping(false);
 
-  // About
-  if (msg.includes("resumeiq") || msg.includes("project"))
-    return "ResumeIQ is an AI-powered Resume Screening Portal that helps candidates upload resumes, receive ATS scores, and apply for jobs while assisting HR with candidate screening.";
+}, 1000);
+};
+ const clearChat = () => {
+  if (!window.confirm("Clear this conversation?")) return;
 
-  // Thanks
-  if (msg.includes("thank"))
-    return "😊 You're welcome! Feel free to ask me anything else.";
-
-  // Bye
-  if (msg.includes("bye"))
-    return "👋 Thank you for visiting ResumeIQ. Have a wonderful day!";
-
-  // Default
-  return "I'm sorry, I don't have information about that yet. Please try asking about login, registration, resume upload, ATS score, jobs, or Google Sign-In.";
+  setMessages([
+    {
+      sender: "bot",
+      text: "👋 Hi! I'm ResumeIQ AI Assistant. How can I help you today?",
+      time: getCurrentTime(),
+    },
+  ]);
 };
 
-  const sendMessage = () => {
-    if (!input.trim()) return;
+const handleSuggestionClick = (question) => {
+  setInput(question);
 
-    const userMessage = {
-      sender: "user",
-      text: input,
-    };
-
-    const botMessage = {
-      sender: "bot",
-      text: getBotReply(input),
-    };
-
-    setMessages((prev) => [...prev, userMessage, botMessage]);
-    setInput("");
-  };
+  setTimeout(() => {
+    document.getElementById("chat-send-btn")?.click();
+  }, 100);
+};
 
   return (
     <>
@@ -123,35 +144,139 @@ export default function ChatBot() {
         <div className="fixed bottom-24 right-6 z-50 w-96 h-[500px] bg-white rounded-2xl shadow-2xl border overflow-hidden flex flex-col">
 
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-4">
-            <h2 className="font-bold text-lg">ResumeIQ AI Assistant</h2>
-            <p className="text-xs opacity-80">
-              Ask me anything about ResumeIQ
-            </p>
-          </div>
+<div className="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-4">
 
+  <div className="flex justify-between items-center">
+
+    {/* Left Side */}
+    <div className="flex items-center gap-3">
+
+      <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl">
+        🤖
+      </div>
+
+      <div>
+        <h2 className="font-bold text-lg">
+          ResumeIQ AI Assistant
+        </h2>
+
+        <p className="text-xs text-green-300 flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-green-400"></span>
+          AI Ready
+        </p>
+      </div>
+
+    </div>
+
+    {/* Right Side */}
+    <button
+      onClick={clearChat}
+      className="hover:bg-white/20 p-2 rounded-full transition"
+      title="Clear Chat"
+    >
+      <FaTrash />
+    </button>
+
+  </div>
+
+</div>
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`max-w-[80%] px-4 py-2 rounded-xl text-sm ${
-                  msg.sender === "user"
-  ? "ml-auto bg-blue-600 text-white"
-  : "bg-gray-100 text-gray-900 border border-gray-200"
-                }`}
-              >
-                {msg.text}
-              </div>
-            ))}
-          </div>
+<div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+  {messages.map((msg, index) => (
+  <div
+    key={index}
+    className={`flex items-end gap-2 ${
+      msg.sender === "user"
+        ? "justify-end"
+        : "justify-start"
+    }`}
+  >
+
+    {/* AI Avatar */}
+    {msg.sender === "bot" && (
+      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-lg flex-shrink-0">
+        🤖
+      </div>
+    )}
+
+    {/* Message Bubble */}
+    <div
+      className={`max-w-[75%] px-4 py-3 rounded-2xl shadow-sm text-sm whitespace-pre-line ${
+        msg.sender === "user"
+          ? "bg-blue-600 text-white rounded-br-md"
+          : "bg-white border border-gray-200 text-gray-800 rounded-bl-md"
+      }`}
+    >
+      {msg.type === "support" ? (
+  <SupportCard />
+) : (
+  msg.text
+)}
+
+      
+      <p
+  className={`text-[10px] mt-2 ${
+    msg.sender === "user"
+      ? "text-blue-100 text-right"
+      : "text-gray-400"
+  }`}
+>
+  {msg.time}
+</p>
+    </div>
+
+    {/* User Avatar */}
+    {msg.sender === "user" && (
+      <div className="w-7 h-7 rounded-full bg-sky-500 flex items-center justify-center text-white shadow-lg flex-shrink-0">
+        👤
+      </div>
+    )}
+
+  </div>
+))}
+
+  {/* Typing Indicator */}
+ {isTyping && (
+  <div className="flex items-center gap-2">
+
+    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
+      🤖
+    </div>
+
+    <div className="bg-gray-100 border border-gray-200 rounded-2xl px-4 py-3">
+
+      <div className="typing">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+    </div>
+
+  </div>
+)}
+  <div ref={messagesEndRef}></div>
+</div>
+{messages.length === 1 && (
+  <div className="mt-3 flex flex-wrap gap-2">
+    {suggestions.map((item, index) => (
+      <button
+        key={index}
+        onClick={() => handleSuggestionClick(item)}
+        className="px-3 py-2 rounded-full border border-blue-300 text-blue-700 bg-white hover:bg-blue-50 text-xs transition"
+      >
+        {item}
+      </button>
+    ))}
+  </div>
+)}
 
           {/* Input */}
           <div className="p-3 border-t flex gap-2">
             <input
               type="text"
               placeholder="Ask a question..."
-              className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-black placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 rounded-xl border border-gray-300 bg-white px-3 py-2 text-black placeholder:text-gray-500 outline-none focus:ring-2 focus:ring-blue-500 shadow-md"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
@@ -160,6 +285,7 @@ export default function ChatBot() {
             />
 
             <button
+            id="chat-send-btn"
               onClick={sendMessage}
               className="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700"
             >
