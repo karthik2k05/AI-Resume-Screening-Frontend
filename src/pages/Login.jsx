@@ -9,13 +9,27 @@ import {
   FaGoogle,
   FaEye,
   FaEyeSlash,
+  FaArrowLeft,
 } from "react-icons/fa";
+import { useNavigate, useParams } from "react-router-dom";
+const ROLE_LABELS = {
+  admin: "Admin",
+  hr: "HR",
+  candidate: "Candidate",
+};
 
 export default function Login() {
+  const { role } = useParams();
+  const navigate = useNavigate();
+  const roleLabel = ROLE_LABELS[role] || "Candidate";
+
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  
+  
+  
 
   const handleLogin = async () => {
   if (!email || !password) {
@@ -36,7 +50,13 @@ export default function Login() {
 
     // Save JWT
     localStorage.setItem("token", response.data.token);
+    localStorage.setItem(
+  "user",
+  JSON.stringify(response.data.user)
+);
+     alert("Login Successful");
 
+    navigate(`/dashboard/${role || "candidate"}`);
     alert(response.data.message);
 
   } catch (error) {
@@ -64,6 +84,11 @@ const handleGoogleLogin = async () => {
     console.log(response.data);
 
     localStorage.setItem("token", response.data.token);
+    localStorage.setItem(
+  "user",
+  JSON.stringify(response.data.user)
+);
+    navigate(`/dashboard/${role || "candidate"}`);
 
     alert(response.data.message);
 
@@ -84,6 +109,13 @@ const handleGoogleLogin = async () => {
       <div className="absolute top-0 left-0 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl"></div>
       <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-cyan-400/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+      <Link
+        to="/"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition"
+      >
+        <FaArrowLeft size={14} />
+        Back to home
+      </Link>
 
       <div className="relative z-10 w-full max-w-4xl h-[600px] bg-white rounded-[24px] overflow-hidden shadow-2xl grid md:grid-cols-[1fr_1fr]">
         {/* LEFT PANEL */}
@@ -211,6 +243,7 @@ const handleGoogleLogin = async () => {
           </div>
         </div>
       </div>
+      
     </div>
   );
 }

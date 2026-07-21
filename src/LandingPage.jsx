@@ -4,7 +4,7 @@ import Features from "./components/Features";
 import Pricing from "./components/Pricing";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
-import ChatBot from "./chatbot/ChatBot";
+
 
 export default function LandingPage({
   darkMode,
@@ -26,7 +26,7 @@ export default function LandingPage({
       <Contact darkMode={darkMode} />
 
       <Footer />
-      <ChatBot />
+      
     </>
   );
 }

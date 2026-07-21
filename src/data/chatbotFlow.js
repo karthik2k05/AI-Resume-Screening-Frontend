@@ -1,16 +1,16 @@
 export const chatbotFlow = {
   main: [
-    { id: "login", title: "🔐 Login" },
-    { id: "registration", title: "📝 Registration" },
-    { id: "resume", title: "📄 Resume Upload" },
-    { id: "ats", title: "🎯 ATS Score" },
-    { id: "jobs", title: "💼 Job Applications" },
-    { id: "candidate", title: "👤 Candidate Dashboard" },
-    { id: "hr", title: "🏢 HR Dashboard" },
-    { id: "admin", title: "🛡️ Admin Dashboard" },
-    { id: "settings", title: "⚙️ Profile & Settings" },
-    { id: "faq", title: "❓ General Questions" },
-    { id: "support", title: "💬 Contact Live Support" },
+    { id: "login", title: " Login" },
+    { id: "registration", title: " Registration" },
+    { id: "resume", title: " Resume Upload" },
+    { id: "ats", title: " ATS Score" },
+    { id: "jobs", title: " Job Applications" },
+    { id: "candidate", title: " Candidate Dashboard" },
+    { id: "hr", title: " HR Dashboard" },
+    { id: "admin", title: " Admin Dashboard" },
+    { id: "settings", title: " Profile & Settings" },
+    { id: "faq", title: " General Questions" },
+    { id: "support", title: " Contact Admin" },
   ],
 
   login: [

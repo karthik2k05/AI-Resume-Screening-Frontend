@@ -1,4 +1,4 @@
-import { Menu, Search, Bell } from "lucide-react";
+import { Menu, Search, Bell, X } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
 
 const ROLE_LABELS = {
@@ -7,9 +7,10 @@ const ROLE_LABELS = {
   candidate: "Candidate",
 };
 
-export default function Topbar({ darkMode, setDarkMode, role, onMenuClick }) {
+export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searchQuery, setSearchQuery }) {
   const roleLabel = ROLE_LABELS[role] || "Candidate";
   const initials = roleLabel.slice(0, 2).toUpperCase();
+  const isCandidate = role === "candidate";
 
   return (
     <header
@@ -27,20 +28,25 @@ export default function Topbar({ darkMode, setDarkMode, role, onMenuClick }) {
         <Menu size={20} />
       </button>
 
-      <div className="flex-1 max-w-md">
+      <div className="flex-1 min-w-0">
         <div
           className={`hidden sm:flex items-center gap-2 rounded-lg border px-3 py-2 ${
-            darkMode
-              ? "bg-slate-900 border-slate-800"
-              : "bg-slate-50 border-slate-200"
+            darkMode ? "bg-slate-900 border-slate-800" : "bg-slate-50 border-slate-200"
           }`}
         >
           <Search size={16} className={darkMode ? "text-slate-500" : "text-slate-400"} />
           <input
             type="text"
-            placeholder={role === "candidate" ? "Search jobs..." : "Search candidates, jobs..."}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={isCandidate ? "Search jobs, applications..." : "Search candidates, jobs..."}
             className="w-full bg-transparent outline-none text-sm placeholder:text-slate-400"
           />
+          {searchQuery && (
+            <button onClick={() => setSearchQuery("")} aria-label="Clear search" className="shrink-0">
+              <X size={15} className={darkMode ? "text-slate-500" : "text-slate-400"} />
+            </button>
+          )}
         </div>
       </div>
 

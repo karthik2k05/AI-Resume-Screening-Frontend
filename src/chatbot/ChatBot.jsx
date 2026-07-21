@@ -4,6 +4,7 @@ import { chatbotFlow } from "../data/chatbotFlow";
 import { knowledgeBase } from "../data/knowledgeBase";
 import AIChat from "./AIChat";
 import { useRef, useEffect } from "react";
+import LiveChat from "./LiveChat";
 
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,6 +12,7 @@ export default function ChatBot() {
   const [currentMenu, setCurrentMenu] = useState("main");
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [showAIChat, setShowAIChat] = useState(false);
+  const [showLiveChat, setShowLiveChat] = useState(false);
   const bottomRef = useRef(null);
   useEffect(() => {
   bottomRef.current?.scrollIntoView({
@@ -22,6 +24,15 @@ export default function ChatBot() {
   const handleMenuSelect = (menuId) => {
     setSelectedAnswer(null);
     setShowHelpOptions(false);
+    if (menuId === "live_chat") {
+    setShowLiveChat(true);
+    return;
+  }
+
+  if (menuId === "ask_ai") {
+    setShowAIChat(true);
+    return;
+  }
 
     // If this menuId exists in knowledgeBase,
     // show the answer instead of opening another menu
@@ -69,7 +80,10 @@ export default function ChatBot() {
           </div>
 
           {/* Body */}
-          {showAIChat ? (
+          {showLiveChat ? (
+    <LiveChat onBack={() => setShowLiveChat(false)} />
+) : 
+          showAIChat ? (
 
   <AIChat onBack={() => setShowAIChat(false)} />
 
@@ -153,9 +167,10 @@ className="w-full mb-2 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
 </button>
 
 <button
+onClick={() => setShowLiveChat(true)}
 className="w-full mb-2 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
 >
-💬 Contact Live Support
+👤 Contact Admin
 </button>
 <div ref={bottomRef}></div>
 

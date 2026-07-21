@@ -1,21 +1,15 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
-import Sidebar from "../components/dashboard/Sidebar";
-import Topbar from "../components/dashboard/Topbar";
-import AdminHrOverview from "../components/dashboard/AdminHrOverview";
-import CandidateOverview from "../components/dashboard/CandidateOverview";
+import { useParams, Outlet } from "react-router-dom";
+import Sidebar from "./Sidebar";
+import Topbar from "./Topbar";
 
-const ROLE_LABELS = {
-  admin: "Admin",
-  hr: "HR",
-  candidate: "Candidate",
-};
+const VALID_ROLES = ["admin", "hr", "candidate"];
 
-export default function Dashboard({ darkMode, setDarkMode }) {
+export default function DashboardLayout({ darkMode, setDarkMode }) {
   const { role: rawRole } = useParams();
-  const role = ROLE_LABELS[rawRole] ? rawRole : "candidate";
-  const roleLabel = ROLE_LABELS[role];
+  const role = VALID_ROLES.includes(rawRole) ? rawRole : "candidate";
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <div className={`flex min-h-screen ${darkMode ? "bg-slate-950 text-white" : "bg-slate-50 text-slate-900"}`}>
@@ -32,14 +26,13 @@ export default function Dashboard({ darkMode, setDarkMode }) {
           setDarkMode={setDarkMode}
           role={role}
           onMenuClick={() => setSidebarOpen(true)}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
         />
 
+        {/* Whichever sidebar page is active renders here via nested routes */}
         <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          {role === "candidate" ? (
-            <CandidateOverview darkMode={darkMode} />
-          ) : (
-            <AdminHrOverview darkMode={darkMode} roleLabel={roleLabel} />
-          )}
+          <Outlet context={{ darkMode, role, searchQuery }} />
         </main>
       </div>
     </div>

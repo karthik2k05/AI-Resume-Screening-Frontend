@@ -24,7 +24,6 @@ import {
   Check,
 } from "lucide-react";
 import StatCard from "./StatCard";
-
 const APPLICANT_TREND = [
   { month: "Feb", applicants: 145 },
   { month: "Mar", applicants: 210 },

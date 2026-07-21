@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import API from "../api/authApi";
 import {
   FaUser,
@@ -8,9 +8,11 @@ import {
   FaGoogle,
   FaEye,
   FaEyeSlash,
+  FaArrowLeft,
 } from "react-icons/fa";
 
 export default function Register() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -43,6 +45,7 @@ export default function Register() {
   });
 
   alert(response.data.message);
+  navigate("/login/candidate");
 
   // Clear the form
   setName("");
@@ -64,6 +67,14 @@ export default function Register() {
       <div className="absolute top-0 left-0 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl"></div>
       <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-cyan-400/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+       <Link
+        to="/"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition"
+      >
+        <FaArrowLeft size={14} />
+        Back to home
+      </Link>
+      
 
       <div className="relative z-10 w-full max-w-4xl h-[600px] bg-white rounded-[24px] overflow-hidden shadow-2xl grid md:grid-cols-[1fr_1fr]">
         {/* LEFT PANEL */}

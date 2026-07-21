@@ -1,42 +1,67 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   Users,
   Briefcase,
-  BarChart3,
+  ChartColumn,
   Settings,
   ScanSearch,
   X,
   LogOut,
   FileText,
+  MessageSquare,
 } from "lucide-react";
 
-const ADMIN_HR_NAV = [
-  { label: "Overview", icon: LayoutDashboard, active: true },
-  { label: "Candidates", icon: Users },
-  { label: "Job Postings", icon: Briefcase },
-  { label: "Analytics", icon: BarChart3 },
-  { label: "Settings", icon: Settings },
-];
+function navFor(role) {
+  const base = `/dashboard/${role}`;
+  if (role === "candidate") {
+    return [
+      { label: "Overview", icon: LayoutDashboard, to: base, end: true },
+      { label: "My Applications", icon: FileText, to: `${base}/applications` },
+      { label: "Job Matches", icon: Briefcase, to: `${base}/matches` },
+      { label: "Settings", icon: Settings, to: `${base}/settings` },
+    ];
+  }
+  if (role === "admin") {
+  return [
+    { label: "Overview", icon: LayoutDashboard, to: base, end: true },
+    { label: "Candidates", icon: Users, to: `${base}/candidates` },
+    { label: "Job Postings", icon: Briefcase, to: `${base}/jobs` },
+    { label: "Analytics", icon: ChartColumn, to: `${base}/analytics` },
 
-const CANDIDATE_NAV = [
-  { label: "Overview", icon: LayoutDashboard, active: true },
-  { label: "My Applications", icon: FileText },
-  { label: "Job Matches", icon: Briefcase },
-  { label: "Settings", icon: Settings },
-];
+    // NEW
+    { label: "Support Chats", icon: MessageSquare, to: `${base}/support` },
+
+    { label: "Settings", icon: Settings, to: `${base}/settings` },
+  ];
+}
+
+if (role === "hr") {
+  return [
+    { label: "Overview", icon: LayoutDashboard, to: base, end: true },
+    { label: "Candidates", icon: Users, to: `${base}/candidates` },
+    { label: "Job Postings", icon: Briefcase, to: `${base}/jobs` },
+    { label: "Analytics", icon: ChartColumn, to: `${base}/analytics` },
+    { label: "Settings", icon: Settings, to: `${base}/settings` },
+  ];
+}
+}
 
 export default function Sidebar({ darkMode, role, mobileOpen, onClose }) {
-  const navItems = role === "candidate" ? CANDIDATE_NAV : ADMIN_HR_NAV;
+  const navItems = navFor(role);
 
   const content = (
     <div
-      className={`flex h-full w-64 flex-col border-r ${
-        darkMode ? "bg-slate-950 border-slate-800" : "bg-white border-slate-200"
+      className={`flex h-full w-64 flex-col border-r shadow-sm ${
+        darkMode ? "bg-slate-900 border-slate-800 shadow-black/20" : "bg-white border-slate-200 shadow-slate-200/60"
       }`}
     >
-      <div className="flex items-center justify-between px-5 h-16 shrink-0">
+      <div
+        className={`flex items-center justify-between px-5 h-16 shrink-0 border-b ${
+          darkMode ? "border-slate-800" : "border-slate-200"
+        }`}
+      >
         <Link to="/" className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-sm shadow-blue-600/30">
             <ScanSearch size={16} className="text-white" strokeWidth={2.25} />
@@ -57,20 +82,25 @@ export default function Sidebar({ darkMode, role, mobileOpen, onClose }) {
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {navItems.map(({ label, icon: Icon, active }) => (
-          <button
+        {navItems.map(({ label, icon: Icon, to, end }) => (
+          <NavLink
             key={label}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-              active
-                ? "bg-blue-600 text-white"
-                : darkMode
-                ? "text-slate-400 hover:bg-slate-900 hover:text-white"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-            }`}
+            to={to}
+            end={end}
+            onClick={onClose}
+            className={({ isActive }) =>
+              `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                isActive
+                  ? "bg-blue-600 text-white"
+                  : darkMode
+                  ? "text-slate-400 hover:bg-slate-800 hover:text-white"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              }`
+            }
           >
             <Icon size={18} />
             {label}
-          </button>
+          </NavLink>
         ))}
       </nav>
 
@@ -83,7 +113,7 @@ export default function Sidebar({ darkMode, role, mobileOpen, onClose }) {
           to="/"
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
             darkMode
-              ? "text-slate-400 hover:bg-slate-900 hover:text-white"
+              ? "text-slate-400 hover:bg-slate-800 hover:text-white"
               : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
           }`}
         >
@@ -96,10 +126,8 @@ export default function Sidebar({ darkMode, role, mobileOpen, onClose }) {
 
   return (
     <>
-      {/* Desktop sidebar */}
       <aside className="hidden lg:block shrink-0">{content}</aside>
 
-      {/* Mobile sidebar drawer */}
       <AnimatePresence>
         {mobileOpen && (
           <>
@@ -115,7 +143,7 @@ export default function Sidebar({ darkMode, role, mobileOpen, onClose }) {
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
-              className="fixed inset-y-0 left-0 z-50 lg:hidden"
+              className="fixed inset-y-0 left-0 z-50 lg:hidden shadow-2xl"
             >
               {content}
             </motion.div>
