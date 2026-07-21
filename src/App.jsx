@@ -21,7 +21,7 @@ function App() {
   const location = useLocation();
 
   const hideChatbot =
-    location.pathname.includes("/dashboard/admin/support");
+    location.pathname.includes("/dashboard/admin");
 
 
 

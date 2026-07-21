@@ -11,7 +11,14 @@ export default function SupportChats() {
     const [selectedUser, setSelectedUser] = useState(null);
     const [messages, setMessages] = useState({});
     const bottomRef = useRef(null);
+    const selectedUserRef = useRef(null);
     const [input, setInput] = useState("");
+    const [search, setSearch] = useState("");
+    const [unread, setUnread] = useState({});
+    // 1️⃣ Keep the ref updated
+useEffect(() => {
+  selectedUserRef.current = selectedUser;
+}, [selectedUser]);
     useEffect(() => {
         const loadConversations = async () => {
     try {
@@ -67,7 +74,17 @@ export default function SupportChats() {
         data,
       ],
     }));
-    
+    const currentUser = selectedUserRef.current;
+
+if (
+  !currentUser ||
+  currentUser.candidateId !== data.candidateId
+) {
+  setUnread((prev) => ({
+    ...prev,
+    [data.candidateId]: (prev[data.candidateId] || 0) + 1,
+  }));
+}
 
     // Auto-select first candidate
 
@@ -139,6 +156,9 @@ export default function SupportChats() {
   selectedUser={selectedUser}
   setSelectedUser={setSelectedUser}
   loadMessages={loadMessages}
+  search={search}
+  setSearch={setSearch}
+  unread={unread}
 />
 
       {/* Right Chat Area */}

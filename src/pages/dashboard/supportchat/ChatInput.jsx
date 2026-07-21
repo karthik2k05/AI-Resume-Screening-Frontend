@@ -4,7 +4,7 @@ export default function ChatInput({
   sendReply,
 }) {
   return (
-    <div className="bg-white border-t p-4 flex gap-3">
+    <div className="bg-blue-50 shadow-lg rounded-b-2xl rounded-lg p-3 flex gap-3 ">
 
       <input
         value={input}
@@ -17,8 +17,10 @@ export default function ChatInput({
         placeholder="Type your reply..."
         className="
           flex-1
-          border
+          placeholder-gray-500
           rounded-xl
+          border
+          border-gray-300
           px-4
           py-3
           outline-none

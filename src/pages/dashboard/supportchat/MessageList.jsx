@@ -4,7 +4,7 @@ export default function MessageList({
   bottomRef,
 }) {
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-100 p-6">
+    <div className="flex-1 overflow-y-auto bg-slate-200 p-6 ">
 
       {(messages[selectedUser.candidateId] || []).map((msg, index) => (
 
@@ -18,7 +18,7 @@ export default function MessageList({
         >
 
           <div
-            className={`max-w-[70%] rounded-2xl px-4 py-3 shadow-md ${
+            className={`max-w-[70%] rounded-2xl px-4 py-1 shadow-md ${
               msg.sender === "admin"
                 ? "bg-blue-600 text-white rounded-br-sm"
                 : "bg-white text-gray-800 rounded-bl-sm border"

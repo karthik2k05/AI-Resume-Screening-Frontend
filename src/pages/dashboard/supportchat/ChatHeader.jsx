@@ -2,7 +2,7 @@ import { FaCircle, FaUserCircle } from "react-icons/fa";
 
 export default function ChatHeader({ selectedUser }) {
   return (
-    <div className="bg-white border-b px-6 py-4 flex items-center justify-between shadow-sm">
+    <div className="bg-blue-300 border-b border-gray-200 px-5 py-4 flex items-center justify-between shadow-sm rounded-lg">
 
       <div className="flex items-center gap-4">
 
