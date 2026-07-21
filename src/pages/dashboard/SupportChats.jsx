@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import SupportAPI from "../../api/supportApi";
 import socket from "../../services/socket";
 import SupportSidebar from "./supportchat/SupportSidebar";
 import ChatHeader from "./supportchat/ChatHeader";
@@ -12,6 +13,22 @@ export default function SupportChats() {
     const bottomRef = useRef(null);
     const [input, setInput] = useState("");
     useEffect(() => {
+        const loadConversations = async () => {
+    try {
+      const res = await SupportAPI.get("/conversations");
+
+      setUsers(res.data);
+
+      if (res.data.length > 0) {
+        setSelectedUser(res.data[0]);
+      }
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  loadConversations();
   socket.connect();
 
   socket.on("connect", () => {
