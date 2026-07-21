@@ -15,28 +15,30 @@ export default function SupportChats() {
     const [input, setInput] = useState("");
     const [search, setSearch] = useState("");
     const [unread, setUnread] = useState({});
-    // 1️⃣ Keep the ref updated
-useEffect(() => {
-  selectedUserRef.current = selectedUser;
-}, [selectedUser]);
-    useEffect(() => {
-        const loadConversations = async () => {
+    const loadConversations = async () => {
     try {
       const res = await SupportAPI.get("/conversations");
 
       setUsers(res.data);
+      console.log("Conversations:", res.data);
 
-      if (res.data.length > 0) {
+      if (!selectedUserRef.current && res.data.length > 0) {
   setSelectedUser(res.data[0]);
-  loadMessages(res.data[0].candidateId);
+  await loadMessages(res.data[0].candidateId);
 }
 
     } catch (err) {
       console.error(err);
     }
   };
+    // 1️⃣ Keep the ref updated
+useEffect(() => {
+  selectedUserRef.current = selectedUser;
+}, [selectedUser]);
+    useEffect(() => {
 
   loadConversations();
+  
   socket.connect();
 
   socket.on("connect", () => {
@@ -51,19 +53,10 @@ useEffect(() => {
 
     // Add candidate to left sidebar
 
-    setUsers((prev) => {
-      if (prev.find((u) => u.candidateId === data.candidateId)) {
-        return prev;
-      }
-
-      return [
-        ...prev,
-        {
-          candidateId: data.candidateId,
-          username: data.username,
-        },
-      ];
-    });
+    loadConversations();
+    if (selectedUserRef.current?.candidateId === data.candidateId) {
+  loadMessages(data.candidateId);
+}
 
     // Store messages candidate-wise
 
@@ -88,11 +81,7 @@ if (
 
     // Auto-select first candidate
 
-    setSelectedUser((current) => current || {
-      candidateId: data.candidateId,
-      username: data.username,
-    });
-
+  
   });
   
 
