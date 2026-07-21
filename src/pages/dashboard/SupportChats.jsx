@@ -10,35 +10,28 @@ export default function SupportChats() {
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
     const [messages, setMessages] = useState({});
-    const bottomRef = useRef(null);
     const selectedUserRef = useRef(null);
     const [input, setInput] = useState("");
     const [search, setSearch] = useState("");
-    const [unread, setUnread] = useState({});
-    const loadConversations = async () => {
+
+    useEffect(() => {
+        const loadConversations = async () => {
     try {
       const res = await SupportAPI.get("/conversations");
 
       setUsers(res.data);
-      console.log("Conversations:", res.data);
 
-      if (!selectedUserRef.current && res.data.length > 0) {
+      if (res.data.length > 0) {
   setSelectedUser(res.data[0]);
-  await loadMessages(res.data[0].candidateId);
+  loadMessages(res.data[0].candidateId);
 }
 
     } catch (err) {
       console.error(err);
     }
   };
-    // 1️⃣ Keep the ref updated
-useEffect(() => {
-  selectedUserRef.current = selectedUser;
-}, [selectedUser]);
-    useEffect(() => {
 
   loadConversations();
-  
   socket.connect();
 
   socket.on("connect", () => {
@@ -53,10 +46,19 @@ useEffect(() => {
 
     // Add candidate to left sidebar
 
-    loadConversations();
-    if (selectedUserRef.current?.candidateId === data.candidateId) {
-  loadMessages(data.candidateId);
-}
+    setUsers((prev) => {
+      if (prev.find((u) => u.candidateId === data.candidateId)) {
+        return prev;
+      }
+
+      return [
+        ...prev,
+        {
+          candidateId: data.candidateId,
+          username: data.username,
+        },
+      ];
+    });
 
     // Store messages candidate-wise
 
@@ -67,21 +69,15 @@ useEffect(() => {
         data,
       ],
     }));
-    const currentUser = selectedUserRef.current;
-
-if (
-  !currentUser ||
-  currentUser.candidateId !== data.candidateId
-) {
-  setUnread((prev) => ({
-    ...prev,
-    [data.candidateId]: (prev[data.candidateId] || 0) + 1,
-  }));
-}
+  
 
     // Auto-select first candidate
 
-  
+    setSelectedUser((current) => current || {
+      candidateId: data.candidateId,
+      username: data.username,
+    });
+
   });
   
 
@@ -147,7 +143,6 @@ if (
   loadMessages={loadMessages}
   search={search}
   setSearch={setSearch}
-  unread={unread}
 />
 
       {/* Right Chat Area */}

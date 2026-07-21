@@ -5,7 +5,6 @@ export default function SupportSidebar({
   loadMessages,
   search,
   setSearch,
-  unread,
 }) {
       const filteredUsers = users.filter((user) =>
     user.username
@@ -90,10 +89,6 @@ const formatLastTime = (date) => {
               onClick={() => {
   setSelectedUser(user);
 
-  setUnread((prev) => ({
-    ...prev,
-    [user.candidateId]: 0,
-  }));
 
   loadMessages(user.candidateId);
 }}
