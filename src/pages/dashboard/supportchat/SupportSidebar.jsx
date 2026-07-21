@@ -3,8 +3,6 @@ export default function SupportSidebar({
   selectedUser,
   setSelectedUser,
   loadMessages,
-  unread,
-  setUnread,
 }) {
   return (
     <div className="w-80 border-r bg-white flex flex-col">
@@ -34,10 +32,6 @@ export default function SupportSidebar({
               onClick={() => {
   setSelectedUser(user);
   loadMessages(user.candidateId);
-  setUnread((prev) => ({
-  ...prev,
-  [user.candidateId]: 0,
-}));
 }}
               className={`cursor-pointer px-5 py-4 border-b transition
               ${
@@ -46,17 +40,11 @@ export default function SupportSidebar({
                   : "hover:bg-gray-100"
               }`}
             >
-              <div className="flex justify-between items-center">
+              
   <h3 className="font-semibold">
     {user.username}
   </h3>
 
-  {unread[user.candidateId] > 0 && (
-    <span className="bg-blue-600 text-white text-xs rounded-full px-2 py-1 min-w-[22px] text-center">
-      {unread[user.candidateId]}
-    </span>
-  )}
-</div>
 
               <p className="text-sm text-gray-500">
                 Click to open conversation

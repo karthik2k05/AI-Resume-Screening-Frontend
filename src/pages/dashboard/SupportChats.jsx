@@ -10,7 +10,6 @@ export default function SupportChats() {
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
     const [messages, setMessages] = useState({});
-    const [unread, setUnread] = useState({});
     const bottomRef = useRef(null);
     const [input, setInput] = useState("");
     useEffect(() => {
@@ -68,16 +67,7 @@ export default function SupportChats() {
         data,
       ],
     }));
-      if (
-  !selectedUser ||
-  selectedUser.candidateId !== data.candidateId
-) {
-  setUnread((prev) => ({
-    ...prev,
-    [data.candidateId]:
-      (prev[data.candidateId] || 0) + 1,
-  }));
-}
+    
 
     // Auto-select first candidate
 
@@ -149,8 +139,6 @@ export default function SupportChats() {
   selectedUser={selectedUser}
   setSelectedUser={setSelectedUser}
   loadMessages={loadMessages}
-  unread={unread}
-  setUnread={setUnread}
 />
 
       {/* Right Chat Area */}
