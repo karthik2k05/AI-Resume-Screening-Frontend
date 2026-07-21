@@ -2,6 +2,7 @@ export default function SupportSidebar({
   users,
   selectedUser,
   setSelectedUser,
+  loadMessages,
 }) {
   return (
     <div className="w-80 border-r bg-white flex flex-col">
@@ -28,7 +29,10 @@ export default function SupportSidebar({
           users.map((user) => (
             <div
               key={user.candidateId}
-              onClick={() => setSelectedUser(user)}
+              onClick={() => {
+  setSelectedUser(user);
+  loadMessages(user.candidateId);
+}}
               className={`cursor-pointer px-5 py-4 border-b transition
               ${
                 selectedUser?.candidateId === user.candidateId

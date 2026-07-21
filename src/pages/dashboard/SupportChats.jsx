@@ -20,8 +20,9 @@ export default function SupportChats() {
       setUsers(res.data);
 
       if (res.data.length > 0) {
-        setSelectedUser(res.data[0]);
-      }
+  setSelectedUser(res.data[0]);
+  loadMessages(res.data[0].candidateId);
+}
 
     } catch (err) {
       console.error(err);
@@ -99,6 +100,7 @@ export default function SupportChats() {
     candidateId: selectedUser.candidateId,
   };
 
+
   socket.emit("admin_message", reply);
 
   setMessages((prev) => ({
@@ -111,6 +113,19 @@ export default function SupportChats() {
 
   setInput("");
 };
+        const loadMessages = async (candidateId) => {
+  try {
+    const res = await SupportAPI.get(`/messages/${candidateId}`);
+
+    setMessages((prev) => ({
+      ...prev,
+      [candidateId]: res.data,
+    }));
+
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
     <div className="h-[calc(100vh-90px)] flex bg-white rounded-xl shadow overflow-hidden">
@@ -121,6 +136,7 @@ export default function SupportChats() {
   users={users}
   selectedUser={selectedUser}
   setSelectedUser={setSelectedUser}
+  loadMessages={loadMessages}
 />
 
       {/* Right Chat Area */}
