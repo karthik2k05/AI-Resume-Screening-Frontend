@@ -10,7 +10,7 @@ export default function SupportChats() {
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
     const [messages, setMessages] = useState({});
-    const selectedUserRef = useRef(null);
+    const bottomRef = useRef(null);
     const [input, setInput] = useState("");
     const [search, setSearch] = useState("");
 

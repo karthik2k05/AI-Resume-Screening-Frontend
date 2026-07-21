@@ -88,8 +88,6 @@ const formatLastTime = (date) => {
               key={user.candidateId}
               onClick={() => {
   setSelectedUser(user);
-
-
   loadMessages(user.candidateId);
 }}
               className={`cursor-pointer mx-2 my-1.5 px-3 py-0.5 rounded-xl transition-all duration-200 shadow-sm
@@ -119,9 +117,6 @@ const formatLastTime = (date) => {
 </div>
 
 
-
-   <div className="flex justify-between items-center">
-
   <h3
     className={`font-semibold text-[15px] ${
       selectedUser?.candidateId === user.candidateId
@@ -132,22 +127,9 @@ const formatLastTime = (date) => {
     {user.username}
   </h3>
 
-  <div className="flex items-center gap-2">
-
-    {unread?.[user.candidateId] > 0 && (
-      <span className="min-w-[20px] h-[20px] rounded-full bg-red-500 text-white text-[11px] font-semibold flex items-center justify-center px-1">
-        {unread[user.candidateId]}
-      </span>
-    )}
-
     <span className="text-xs text-gray-400 font-medium">
       {formatLastTime(user.lastTime)}
-    </span>
-
-  </div>
-
-</div>
-    
+    </span>  
 
 </div>
 
