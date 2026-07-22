@@ -167,7 +167,7 @@ const filteredResults = useMemo(() => {
 
         {dbResults.users.map((user) => (
           <button onClick={() => {
-  navigate(`/${role}/candidates`);
+  navigate(`/dashboard/candidates`);
   setShowResults(false);
   setSearchQuery("");
 }}
