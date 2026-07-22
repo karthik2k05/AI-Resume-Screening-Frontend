@@ -166,7 +166,11 @@ const filteredResults = useMemo(() => {
         </div>
 
         {dbResults.users.map((user) => (
-          <button
+          <button onClick={() => {
+  navigate(`/${role}/candidates`);
+  setShowResults(false);
+  setSearchQuery("");
+}}
             key={user.user_id}
             className={`w-full text-left px-4 py-2 ${
               darkMode
@@ -195,7 +199,11 @@ const filteredResults = useMemo(() => {
         </div>
 
         {dbResults.jobs.map((job) => (
-          <button
+          <button onClick={() => {
+  navigate(`/dashboard/${role}/jobs`);
+  setShowResults(false);
+  setSearchQuery("");
+}}
             key={job.job_id}
             className={`w-full text-left px-4 py-2 ${
               darkMode
@@ -224,7 +232,11 @@ const filteredResults = useMemo(() => {
         </div>
 
         {dbResults.tickets.map((ticket) => (
-          <button
+          <button onClick={() => {
+  navigate(`/dashboard/${role}/support`);
+  setShowResults(false);
+  setSearchQuery("");
+}}
             key={ticket.ticket_id}
             className={`w-full text-left px-4 py-2 ${
               darkMode
@@ -253,7 +265,11 @@ const filteredResults = useMemo(() => {
         </div>
 
         {dbResults.messages.map((msg) => (
-          <button
+          <button onClick={() => {
+  navigate(`/dashboard/${role}/support`);
+  setShowResults(false);
+  setSearchQuery("");
+}}
             key={msg.message_id}
             className={`w-full text-left px-4 py-2 ${
               darkMode
