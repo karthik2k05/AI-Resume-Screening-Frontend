@@ -53,6 +53,8 @@ function App() {
           <Route path="matches" element={<JobMatches />} />
           {/* shared */}
           <Route path="settings" element={<Settings />} />
+          <Route path="overview" element={<Overview />} />
+
           
         
         </Route>

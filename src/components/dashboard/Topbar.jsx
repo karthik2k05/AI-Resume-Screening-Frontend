@@ -1,5 +1,9 @@
 import { Menu, Search, Bell, X } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { searchItems } from "../../data/searchItems";
+import SearchAPI from "../../api/searchApi";
 
 const ROLE_LABELS = {
   admin: "Admin",
@@ -11,6 +15,56 @@ export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searc
   const roleLabel = ROLE_LABELS[role] || "Candidate";
   const initials = roleLabel.slice(0, 2).toUpperCase();
   const isCandidate = role === "candidate";
+  const navigate = useNavigate();
+
+const [showResults, setShowResults] = useState(false);
+const [dbResults, setDbResults] = useState({
+  users: [],
+  jobs: [],
+  applications: [],
+  tickets: [],
+  messages: [],
+});
+
+const filteredResults = useMemo(() => {
+  if (!searchQuery.trim()) return [];
+
+  return searchItems.filter(
+    (item) =>
+      item.roles.includes(role) &&
+      item.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+}, [searchQuery, role]);
+      useEffect(() => {
+  const fetchResults = async () => {
+    if (searchQuery.trim().length < 2) {
+      setDbResults({
+        users: [],
+        jobs: [],
+        applications: [],
+        tickets: [],
+        messages: [],
+      });
+      return;
+    }
+
+    try {
+      const res = await SearchAPI.search(searchQuery);
+      
+
+      setDbResults(res.data);
+      
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const timer = setTimeout(fetchResults, 300);
+
+  return () => clearTimeout(timer);
+
+}, [searchQuery]);
 
   return (
     <header
@@ -30,7 +84,7 @@ export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searc
 
       <div className="flex-1 min-w-0">
         <div
-          className={`hidden sm:flex items-center gap-2 rounded-lg border px-3 py-2 ${
+          className={`relative hidden sm:block flex items-center gap-2 rounded-lg border px-3 py-2 ${
             darkMode ? "bg-slate-900 border-slate-800" : "bg-slate-50 border-slate-200"
           }`}
         >
@@ -38,10 +92,15 @@ export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searc
           <input
             type="text"
             value={searchQuery}
+            onFocus={() => setShowResults(true)}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={isCandidate ? "Search jobs, applications..." : "Search candidates, jobs..."}
-            className="w-full bg-transparent outline-none text-sm placeholder:text-slate-400"
-          />
+            placeholder={
+              isCandidate
+                ? "Search jobs, applications..."
+                : "Search candidates, jobs..."
+          }
+          className="w-full bg-transparent outline-none text-sm placeholder:text-slate-400"
+        />
           {searchQuery && (
             <button onClick={() => setSearchQuery("")} aria-label="Clear search" className="shrink-0">
               <X size={15} className={darkMode ? "text-slate-500" : "text-slate-400"} />
@@ -49,6 +108,172 @@ export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searc
           )}
         </div>
       </div>
+      {showResults && (
+  <div
+    className={`absolute top-full mt-3 w-full rounded-lg shadow-lg border z-50 overflow-hidden ${
+      darkMode
+        ? "bg-slate-900 border-slate-700"
+        : "bg-white border-slate-200"
+    }`}
+  >
+    {/* ---------------- Pages ---------------- */}
+
+    {filteredResults.length > 0 && (
+      <>
+        <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase bg-gray-50">
+          Pages
+        </div>
+
+        {filteredResults.map((item) => (
+          <button
+            key={item.title}
+            onClick={() => {
+              setSearchQuery("");
+              setShowResults(false);
+
+              if (item.path === "#chatbot") {
+                window.dispatchEvent(new Event("open-chatbot"));
+              } else if (item.path === "/dashboard") {
+                navigate(`/dashboard/${role}`);
+              } else {
+                navigate(`/dashboard/${role}/${item.path}`);
+              }
+            }}
+            className={`w-full text-left px-4 py-2 ${
+              darkMode
+                ? "hover:bg-slate-800"
+                : "hover:bg-blue-50"
+            }`}
+          >
+            <div className="text-sm font-semibold">
+              {item.title}
+            </div>
+
+            <div className="text-[11px] text-gray-500">
+              {item.type}
+            </div>
+          </button>
+        ))}
+      </>
+    )}
+
+    {/* ---------------- Users ---------------- */}
+
+    {dbResults.users.length > 0 && (
+      <>
+        <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase border-t">
+          Users
+        </div>
+
+        {dbResults.users.map((user) => (
+          <button
+            key={user.user_id}
+            className={`w-full text-left px-4 py-2 ${
+              darkMode
+                ? "hover:bg-slate-800"
+                : "hover:bg-blue-50"
+            }`}
+          >
+            <div className="font-medium">
+              {user.name}
+            </div>
+
+            <div className="text-xs text-gray-500">
+              {user.role}
+            </div>
+          </button>
+        ))}
+      </>
+    )}
+
+    {/* ---------------- Jobs ---------------- */}
+
+    {dbResults.jobs.length > 0 && (
+      <>
+        <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase border-t">
+          Jobs
+        </div>
+
+        {dbResults.jobs.map((job) => (
+          <button
+            key={job.job_id}
+            className={`w-full text-left px-4 py-2 ${
+              darkMode
+                ? "hover:bg-slate-800"
+                : "hover:bg-blue-50"
+            }`}
+          >
+            <div className="font-medium">
+              {job.job_title}
+            </div>
+
+            <div className="text-xs text-gray-500">
+              {job.required_skills}
+            </div>
+          </button>
+        ))}
+      </>
+    )}
+
+    {/* ---------------- Support Tickets ---------------- */}
+
+    {dbResults.tickets.length > 0 && (
+      <>
+        <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase border-t">
+          Support Tickets
+        </div>
+
+        {dbResults.tickets.map((ticket) => (
+          <button
+            key={ticket.ticket_id}
+            className={`w-full text-left px-4 py-2 ${
+              darkMode
+                ? "hover:bg-slate-800"
+                : "hover:bg-blue-50"
+            }`}
+          >
+            <div className="font-medium">
+              {ticket.issue_type}
+            </div>
+
+            <div className="text-xs text-gray-500">
+              {ticket.status}
+            </div>
+          </button>
+        ))}
+      </>
+    )}
+
+    {/* ---------------- Messages ---------------- */}
+
+    {dbResults.messages.length > 0 && (
+      <>
+        <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase border-t">
+          Messages
+        </div>
+
+        {dbResults.messages.map((msg) => (
+          <button
+            key={msg.message_id}
+            className={`w-full text-left px-4 py-2 ${
+              darkMode
+                ? "hover:bg-slate-800"
+                : "hover:bg-blue-50"
+            }`}
+          >
+            <div className="font-medium truncate">
+              {msg.message}
+            </div>
+
+            <div className="text-xs text-gray-500">
+              {msg.sender}
+            </div>
+          </button>
+        ))}
+      </>
+    )}
+  </div>
+)}
 
       <button
         className={`relative p-2 rounded-lg transition-colors ${
