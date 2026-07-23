@@ -37,12 +37,18 @@ useEffect(() => {
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
 
   const filteredCandidates = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return candidates;
-    return candidates.filter(
-      (c) => c.name.toLowerCase().includes(q) || c.role.toLowerCase().includes(q) || c.status.toLowerCase().includes(q)
-    );
-  }, [candidates, searchQuery]);
+  const q = searchQuery.trim().toLowerCase();
+
+  if (!q) return candidates;
+
+  return candidates.filter(
+    (c) =>
+      (c.name || "").toLowerCase().includes(q) ||
+      (c.email || "").toLowerCase().includes(q) ||
+      (c.role || "").toLowerCase().includes(q) ||
+      (c.status || "").toLowerCase().includes(q)
+  );
+}, [candidates, searchQuery]);
 
   const advanceCandidate = (id) => {
     setCandidates((prev) =>
