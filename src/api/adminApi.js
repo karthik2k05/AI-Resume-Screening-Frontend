@@ -1,4 +1,4 @@
-import API from "./authApi";
+import API from "./api";
 
 const AdminAPI = {
   getCandidates: (page = 1, limit = 10) =>
