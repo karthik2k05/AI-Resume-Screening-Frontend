@@ -1,4 +1,4 @@
-import API from "./apiSearch";
+import API from "./api";
 
 const SearchAPI = {
   search: (query) =>
