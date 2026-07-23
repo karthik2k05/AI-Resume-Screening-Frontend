@@ -1,11 +1,39 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState,useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Download } from "lucide-react";
-import { INITIAL_CANDIDATES, STAGES, STATUS_STYLES, initials } from "../../data/mockDashboardData";
+import AdminAPI from "../../api/adminApi";
+import { STAGES, STATUS_STYLES, initials } from "../../data/mockDashboardData";
 
 export default function Candidates() {
   const { darkMode, searchQuery } = useOutletContext();
-  const [candidates, setCandidates] = useState(INITIAL_CANDIDATES);
+ const [candidates, setCandidates] = useState([]);
+
+const [page, setPage] = useState(1);
+
+const [totalPages, setTotalPages] = useState(1);
+useEffect(() => {
+
+  const fetchCandidates = async () => {
+
+    try {
+
+      const res = await AdminAPI.getCandidates(page,10);
+
+      setCandidates(res.data.data);
+
+      setTotalPages(res.data.pagination.totalPages);
+
+    } catch (err) {
+
+      console.error(err);
+
+    }
+
+  };
+
+  fetchCandidates();
+
+}, [page]);
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
 
   const filteredCandidates = useMemo(() => {
@@ -19,7 +47,7 @@ export default function Candidates() {
   const advanceCandidate = (id) => {
     setCandidates((prev) =>
       prev.map((c) => {
-        if (c.id !== id) return c;
+        if (c.user_id !== id) return c;
         const idx = STAGES.indexOf(c.status);
         const next = idx === -1 || idx === STAGES.length - 1 ? c.status : STAGES[idx + 1];
         return { ...c, status: next };
@@ -28,7 +56,7 @@ export default function Candidates() {
   };
 
   const rejectCandidate = (id) => {
-    setCandidates((prev) => prev.map((c) => (c.id === id ? { ...c, status: "Rejected" } : c)));
+    setCandidates((prev) => prev.map((c) => (c.user_id === id ? { ...c, status: "Rejected" } : c)));
   };
 
   const exportReport = () => {
@@ -40,6 +68,7 @@ export default function Candidates() {
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
+    
     link.href = url;
     link.download = "candidates.csv";
     link.click();
@@ -98,7 +127,7 @@ export default function Candidates() {
                   </td>
                   <td className={`px-4 py-3.5 whitespace-nowrap ${darkMode ? "text-slate-400" : "text-slate-600"}`}>{c.role}</td>
                   <td className="px-4 py-3.5">
-                    <span className={c.score >= 85 ? "text-emerald-600 font-semibold" : c.score >= 70 ? "text-amber-600 font-semibold" : "text-rose-600 font-semibold"}>
+                    <span className={Number(c.score) >= 85 ? "text-emerald-600 font-semibold" : Number(c.score) >= 70 ? "text-amber-600 font-semibold" : "text-rose-600 font-semibold"}>
                       {c.score}%
                     </span>
                   </td>
@@ -111,11 +140,11 @@ export default function Candidates() {
                     <div className="flex items-center justify-end gap-2">
                       {c.status !== "Hired" && c.status !== "Rejected" ? (
                         <>
-                          <button onClick={() => advanceCandidate(c.id)} className="text-xs font-semibold text-blue-600 hover:text-blue-700 whitespace-nowrap">
+                          <button onClick={() => advanceCandidate(c.user_id)} className="text-xs font-semibold text-blue-600 hover:text-blue-700 whitespace-nowrap">
                             Advance
                           </button>
                           <span className={darkMode ? "text-slate-700" : "text-slate-300"}>|</span>
-                          <button onClick={() => rejectCandidate(c.id)} className="text-xs font-semibold text-rose-600 hover:text-rose-700">
+                          <button onClick={() => rejectCandidate(c.user_id)} className="text-xs font-semibold text-rose-600 hover:text-rose-700">
                             Reject
                           </button>
                         </>
