@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { FaArrowLeft, FaPaperPlane, FaCircle } from "react-icons/fa";
 import socket from "../services/socket";
+import SupportAPI from "../api/supportApi";
 
 export default function LiveChat({ onBack }) {
   // TODO: Replace with the logged-in username from your auth state
   const user = JSON.parse(localStorage.getItem("user"));
 
     const username = user?.name;
-    const candidateId = user?.id;
+    const candidateId = user?.user_id;
+    console.log(user);
+    console.log("Candidate ID:", candidateId);
 
   const [messages, setMessages] = useState([
     {
@@ -31,11 +34,34 @@ export default function LiveChat({ onBack }) {
     socket.on("connect", () => {
   setConnected(true);
 
-  socket.emit(
-    "join_candidate_room",
-    candidateId.toString()
-  );
+  if (candidateId) {
+    socket.emit(
+      "join_candidate_room",
+      candidateId.toString()
+    );
+  }
 });
+    const loadMessages = async () => {
+  try {
+    const res = await SupportAPI.get(`/messages/${candidateId}`);
+
+    const history = res.data.map((msg) => ({
+      sender: msg.sender,
+      text: msg.message,
+      time: new Date(msg.created_at).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    }));
+
+    setMessages(history);
+  } catch (err) {
+    console.error(err);
+  }
+};  
+  if (candidateId) {
+  loadMessages();
+}
 
     socket.on("disconnect", () => {
       setConnected(false);
@@ -74,7 +100,7 @@ export default function LiveChat({ onBack }) {
     const msg = input.trim();
 
     if (!msg) return;
-
+    if (!candidateId) return;
     const message = {
   room: candidateId.toString(),
   candidateId: candidateId.toString(),
