@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { searchItems } from "../../data/searchItems";
 import SearchAPI from "../../api/searchApi";
+import socket from "../../services/socket";
 
 const ROLE_LABELS = {
   admin: "Admin",
@@ -12,10 +13,44 @@ const ROLE_LABELS = {
 };
 
 export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searchQuery, setSearchQuery }) {
+  const [notificationCount, setNotificationCount] = useState(0);
+  useEffect(() => {
+  socket.connect();
+
+  if (role === "admin") {
+    socket.emit("join_admin");
+
+    socket.on("new_admin_notification", (data) => {
+      console.log("🔔 Admin Notification:", data);
+
+      setNotificationCount((prev) => prev + 1);
+    });
+  }
+
+  if (role === "candidate") {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    if (user?.user_id) {
+      socket.emit("join_candidate_room", user.user_id.toString());
+
+      socket.on("new_candidate_notification", (data) => {
+        console.log("🔔 Candidate Notification:", data);
+
+        setNotificationCount((prev) => prev + 1);
+      });
+    }
+  }
+
+  return () => {
+    socket.off("new_admin_notification");
+    socket.off("new_candidate_notification");
+  };
+}, [role]);
   const roleLabel = ROLE_LABELS[role] || "Candidate";
   const initials = roleLabel.slice(0, 2).toUpperCase();
   const isCandidate = role === "candidate";
   const navigate = useNavigate();
+  
 
 const [showResults, setShowResults] = useState(false);
 const [dbResults, setDbResults] = useState({
@@ -292,13 +327,35 @@ const filteredResults = useMemo(() => {
 )}
 
       <button
+        onClick={() => setNotificationCount(0)}
         className={`relative p-2 rounded-lg transition-colors ${
           darkMode ? "hover:bg-slate-800" : "hover:bg-slate-100"
         }`}
         aria-label="Notifications"
       >
         <Bell size={19} />
-        <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-blue-600" />
+        {notificationCount > 0 && (
+  <span
+    className="
+      absolute
+      -top-1
+      -right-1
+      bg-red-600
+      text-white
+      text-[10px]
+      font-bold
+      rounded-full
+      min-w-[18px]
+      h-[18px]
+      flex
+      items-center
+      justify-center
+      px-1
+    "
+  >
+    {notificationCount}
+  </span>
+)}
       </button>
 
       <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
