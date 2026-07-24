@@ -13,6 +13,7 @@ const ROLE_LABELS = {
 };
 
 export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searchQuery, setSearchQuery }) {
+  const [notificationCount, setNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   useEffect(() => {
@@ -341,22 +342,7 @@ const filteredResults = useMemo(() => {
 )}
 
       <button
-        onClick={() => {
-
-    navigate("/dashboard/admin/support");
-
-    setNotifications(prev =>
-        prev.map(n =>
-            n.id === notification.id
-                ? { ...n, read: true }
-                : n
-        )
-    );
-
-    setNotificationCount(prev =>
-        Math.max(prev - 1, 0)
-    );
-}}
+       onClick={() => setShowNotifications(!showNotifications)}
         className={`relative p-2 rounded-lg transition-colors ${
           darkMode ? "hover:bg-slate-800" : "hover:bg-slate-100"
         }`}
@@ -400,11 +386,28 @@ const filteredResults = useMemo(() => {
         ) : (
             notifications.map((n) => (
                 <div
-                    key={n.id}
-                    className={`p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800 ${
-                        !n.read ? "bg-blue-50 dark:bg-slate-800" : ""
-                    }`}
-                >
+    key={n.id}
+    onClick={() => {
+        navigate("/dashboard/admin/support");
+
+        setNotifications(prev =>
+            prev.map(item =>
+                item.id === n.id
+                    ? { ...item, read: true }
+                    : item
+            )
+        );
+
+        setNotificationCount(prev =>
+            Math.max(prev - 1, 0)
+        );
+
+        setShowNotifications(false);
+    }}
+    className={`p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800 ${
+        !n.read ? "bg-blue-50 dark:bg-slate-800" : ""
+    }`}
+>
                     <div className="font-semibold">
                         {n.username}
                     </div>
