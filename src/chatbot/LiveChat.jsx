@@ -8,10 +8,8 @@ export default function LiveChat({ onBack }) {
   const user = JSON.parse(localStorage.getItem("user"));
 
     const username = user?.name;
-    const candidateId = user?.user_id;
-    console.log(user);
-    console.log("Candidate ID:", candidateId);
-
+    const candidateId = user?.id;
+    
   const [messages, setMessages] = useState([
     {
       sender: "admin",
@@ -29,6 +27,9 @@ export default function LiveChat({ onBack }) {
   const bottomRef = useRef(null);
 
   useEffect(() => {
+    console.log(user);
+    console.log("Candidate ID:", candidateId);
+
     socket.connect();
 
     socket.on("connect", () => {
