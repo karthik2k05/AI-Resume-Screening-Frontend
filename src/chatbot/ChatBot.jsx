@@ -13,6 +13,25 @@ export default function ChatBot() {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [showAIChat, setShowAIChat] = useState(false);
   const [showLiveChat, setShowLiveChat] = useState(false);
+  useEffect(() => {
+
+  const openChat = () => {
+    setShowLiveChat(true);
+  };
+
+  window.addEventListener(
+    "openLiveChat",
+    openChat
+  );
+
+  return () => {
+    window.removeEventListener(
+      "openLiveChat",
+      openChat
+    );
+  };
+
+}, []);
   const bottomRef = useRef(null);
   useEffect(() => {
   bottomRef.current?.scrollIntoView({

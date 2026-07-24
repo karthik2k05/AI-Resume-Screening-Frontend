@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import SupportAPI from "../../api/supportApi";
 import socket from "../../services/socket";
 import SupportSidebar from "./supportchat/SupportSidebar";
@@ -10,9 +11,14 @@ export default function SupportChats() {
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
     const [messages, setMessages] = useState({});
+    
     const bottomRef = useRef(null);
     const [input, setInput] = useState("");
     const [search, setSearch] = useState("");
+    const location = useLocation();
+
+const selectedCandidateFromNotification =
+  location.state?.candidateId;
 
     useEffect(() => {
 
@@ -27,10 +33,25 @@ export default function SupportChats() {
 
     setUsers(conversations);
 
-    if (conversations.length > 0) {
-      setSelectedUser(conversations[0]);
-      loadMessages(conversations[0].candidateId);
+    if (selectedCandidateFromNotification) {
+
+    const user = conversations.find(
+        u =>
+            Number(u.candidateId) ===
+            Number(selectedCandidateFromNotification)
+    );
+
+    if (user) {
+        setSelectedUser(user);
+        loadMessages(user.candidateId);
     }
+
+} else if (conversations.length > 0) {
+
+    setSelectedUser(conversations[0]);
+    loadMessages(conversations[0].candidateId);
+
+}
 
   } catch (err) {
     console.error(err);

@@ -3,6 +3,7 @@ import ThemeToggle from "../ThemeToggle";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { searchItems } from "../../data/searchItems";
+import { useLocation } from "react-router-dom";
 import SearchAPI from "../../api/searchApi";
 import socket from "../../services/socket";
 
@@ -49,10 +50,24 @@ export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searc
       socket.emit("join_candidate_room", user.id.toString());
 
       socket.on("new_candidate_notification", (data) => {
-        console.log("🔔 Candidate Notification:", data);
+  console.log("🔔 Candidate Notification:", data);
 
-        setNotificationCount((prev) => prev + 1);
-      });
+  setNotificationCount((prev) => prev + 1);
+
+  setNotifications((prev) => [
+    {
+      id: Date.now(),
+      message: data.message,
+      username: "Admin",
+      read: false,
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    },
+    ...prev,
+  ]);
+});
     }
   }
 
@@ -61,6 +76,7 @@ export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searc
     socket.off("new_candidate_notification");
   };
 }, [role]);
+  
   const roleLabel = ROLE_LABELS[role] || "Candidate";
   const initials = roleLabel.slice(0, 2).toUpperCase();
   const isCandidate = role === "candidate";
@@ -373,9 +389,9 @@ const filteredResults = useMemo(() => {
 )}
       </button>
       {showNotifications && (
-    <div className="absolute right-0 top-12 w-80 bg-white dark:bg-slate-900 border rounded-xl shadow-lg z-50">
+    <div className="absolute right-0 top-12 w-80 bg-white bg-slate-900 border-gray-500 rounded-xl shadow-lg z-50">
 
-        <div className="p-3 border-b font-semibold">
+        <div className="p-3 border-g font-semibold">
             Notifications
         </div>
 
@@ -388,7 +404,22 @@ const filteredResults = useMemo(() => {
                 <div
     key={n.id}
     onClick={() => {
-        navigate("/dashboard/admin/support");
+
+        if (role === "admin") {
+
+  navigate("/dashboard/admin/support", {
+    state: {
+      candidateId: n.candidateId,
+    },
+  });
+
+} else {
+
+  window.dispatchEvent(
+    new CustomEvent("openLiveChat")
+  );
+
+}
 
         setNotifications(prev =>
             prev.map(item =>
@@ -404,8 +435,8 @@ const filteredResults = useMemo(() => {
 
         setShowNotifications(false);
     }}
-    className={`p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800 ${
-        !n.read ? "bg-blue-50 dark:bg-slate-800" : ""
+    className={`p-1 cursor-pointer hover:bg-blue-100 dark:hover:bg-slate-400 ${
+        !n.read ? "bg-blue-500 dark:bg-slate-200" : ""
     }`}
 >
                     <div className="font-semibold">
@@ -413,8 +444,10 @@ const filteredResults = useMemo(() => {
                     </div>
 
                     <div className="text-sm text-gray-500">
-                        sent you a message
-                    </div>
+  {role === "admin"
+    ? `${n.username} sent you a message`
+    : "Admin replied to your message"}
+</div>
 
                     <div className="text-xs text-gray-400">
                         {n.time}
