@@ -15,22 +15,27 @@ export default function SupportChats() {
     const [search, setSearch] = useState("");
 
     useEffect(() => {
-        const loadConversations = async () => {
-    try {
-      const res = await SupportAPI.get("/conversations");
 
-      setUsers(res.data);
+       const loadConversations = async () => {
+  try {
+    const res = await SupportAPI.get("/conversations");
 
-      if (res.data.length > 0) {
-  setSelectedUser(res.data[0]);
-  loadMessages(res.data[0].candidateId);
-}
+    const conversations = res.data.map((user) => ({
+      ...user,
+      candidateId: Number(user.candidateId),
+    }));
 
-    } catch (err) {
-      console.error(err);
+    setUsers(conversations);
+
+    if (conversations.length > 0) {
+      setSelectedUser(conversations[0]);
+      loadMessages(conversations[0].candidateId);
     }
-  };
 
+  } catch (err) {
+    console.error(err);
+  }
+};
   loadConversations();
   socket.connect();
 
@@ -47,21 +52,19 @@ export default function SupportChats() {
     // Add candidate to left sidebar
     
     setUsers((prev) => {
-      const id = Number(data.candidateId);
-  if (
-    prev.some(
-      (u) => Number(u.candidateId) === id
-    )
-  ) {
-    return prev;
-  }
+  const id = Number(data.candidateId);
+
+  const filtered = prev.filter(
+    (u) => Number(u.candidateId) !== id
+  );
 
   return [
-    ...prev,
     {
       candidateId: id,
       username: data.username,
+      lastMessage: data.message,
     },
+    ...filtered,
   ];
 });
 
@@ -98,6 +101,20 @@ export default function SupportChats() {
   });
 }, [messages, selectedUser]);
 
+    const loadMessages = async (candidateId) => {
+  try {
+    const res = await SupportAPI.get(`/messages/${candidateId}`);
+
+    setMessages((prev) => ({
+      ...prev,
+      [candidateId]: res.data,
+    }));
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
         const sendReply = () => {
   if (!input.trim() || !selectedUser) return;
 
@@ -122,26 +139,7 @@ export default function SupportChats() {
 
   setInput("");
 };
-       const loadConversations = async () => {
-  try {
-    const res = await SupportAPI.get("/conversations");
-
-    const conversations = res.data.map((user) => ({
-      ...user,
-      candidateId: Number(user.candidateId),
-    }));
-
-    setUsers(conversations);
-
-    if (conversations.length > 0) {
-      setSelectedUser(conversations[0]);
-      loadMessages(conversations[0].candidateId);
-    }
-
-  } catch (err) {
-    console.error(err);
-  }
-};
+      
 
   return (
     <div className="h-[calc(100vh-90px)] flex bg-white rounded-xl shadow overflow-hidden">
