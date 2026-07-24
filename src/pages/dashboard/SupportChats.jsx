@@ -45,20 +45,25 @@ export default function SupportChats() {
   
 
     // Add candidate to left sidebar
-
+    
     setUsers((prev) => {
-      if (prev.find((u) => u.candidateId === data.candidateId)) {
-        return prev;
-      }
+      const id = Number(data.candidateId);
+  if (
+    prev.some(
+      (u) => Number(u.candidateId) === id
+    )
+  ) {
+    return prev;
+  }
 
-      return [
-        ...prev,
-        {
-          candidateId: data.candidateId,
-          username: data.username,
-        },
-      ];
-    });
+  return [
+    ...prev,
+    {
+      candidateId: id,
+      username: data.username,
+    },
+  ];
+});
 
     // Store messages candidate-wise
 
@@ -117,14 +122,21 @@ export default function SupportChats() {
 
   setInput("");
 };
-        const loadMessages = async (candidateId) => {
+       const loadConversations = async () => {
   try {
-    const res = await SupportAPI.get(`/messages/${candidateId}`);
+    const res = await SupportAPI.get("/conversations");
 
-    setMessages((prev) => ({
-      ...prev,
-      [candidateId]: res.data,
+    const conversations = res.data.map((user) => ({
+      ...user,
+      candidateId: Number(user.candidateId),
     }));
+
+    setUsers(conversations);
+
+    if (conversations.length > 0) {
+      setSelectedUser(conversations[0]);
+      loadMessages(conversations[0].candidateId);
+    }
 
   } catch (err) {
     console.error(err);
