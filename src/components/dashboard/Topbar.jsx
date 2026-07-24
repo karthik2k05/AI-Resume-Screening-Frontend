@@ -13,7 +13,8 @@ const ROLE_LABELS = {
 };
 
 export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searchQuery, setSearchQuery }) {
-  const [notificationCount, setNotificationCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
   useEffect(() => {
   socket.connect();
 
@@ -21,10 +22,23 @@ export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searc
     socket.emit("join_admin");
 
     socket.on("new_admin_notification", (data) => {
-      console.log("🔔 Admin Notification:", data);
+    setNotificationCount(prev => prev + 1);
 
-      setNotificationCount((prev) => prev + 1);
-    });
+    setNotifications(prev => [
+        {
+            id: Date.now(),
+            candidateId: Number(data.candidateId),
+            username: data.username,
+            message: data.message,
+            read: false,
+            time: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+            }),
+        },
+        ...prev,
+    ]);
+});
   }
 
   if (role === "candidate") {
@@ -327,7 +341,22 @@ const filteredResults = useMemo(() => {
 )}
 
       <button
-        onClick={() => setNotificationCount(0)}
+        onClick={() => {
+
+    navigate("/dashboard/admin/support");
+
+    setNotifications(prev =>
+        prev.map(n =>
+            n.id === notification.id
+                ? { ...n, read: true }
+                : n
+        )
+    );
+
+    setNotificationCount(prev =>
+        Math.max(prev - 1, 0)
+    );
+}}
         className={`relative p-2 rounded-lg transition-colors ${
           darkMode ? "hover:bg-slate-800" : "hover:bg-slate-100"
         }`}
@@ -357,6 +386,41 @@ const filteredResults = useMemo(() => {
   </span>
 )}
       </button>
+      {showNotifications && (
+    <div className="absolute right-0 top-12 w-80 bg-white dark:bg-slate-900 border rounded-xl shadow-lg z-50">
+
+        <div className="p-3 border-b font-semibold">
+            Notifications
+        </div>
+
+        {notifications.length === 0 ? (
+            <div className="p-4 text-sm text-gray-500">
+                No notifications
+            </div>
+        ) : (
+            notifications.map((n) => (
+                <div
+                    key={n.id}
+                    className={`p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-800 ${
+                        !n.read ? "bg-blue-50 dark:bg-slate-800" : ""
+                    }`}
+                >
+                    <div className="font-semibold">
+                        {n.username}
+                    </div>
+
+                    <div className="text-sm text-gray-500">
+                        sent you a message
+                    </div>
+
+                    <div className="text-xs text-gray-400">
+                        {n.time}
+                    </div>
+                </div>
+            ))
+        )}
+    </div>
+)}
 
       <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
 
