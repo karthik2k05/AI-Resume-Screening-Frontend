@@ -7,6 +7,9 @@ export default function JobPostings() {
   const { darkMode, searchQuery } = useOutletContext();
   const [postings, setPostings] = useState(INITIAL_POSTINGS);
   const [showNewJob, setShowNewJob] = useState(false);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  
   const [newJobTitle, setNewJobTitle] = useState("");
   const [newJobDept, setNewJobDept] = useState("");
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
@@ -16,6 +19,13 @@ export default function JobPostings() {
     if (!q) return postings;
     return postings.filter((p) => p.title.toLowerCase().includes(q) || p.dept.toLowerCase().includes(q));
   }, [postings, searchQuery]);
+  const totalPages = Math.ceil(filteredPostings.length / limit);
+
+const start = (page - 1) * limit;
+
+const end = start + limit;
+
+const paginatedPostings = filteredPostings.slice(start, end);
 
   const addJobPosting = () => {
     if (!newJobTitle.trim() || !newJobDept.trim()) return;
@@ -90,7 +100,7 @@ export default function JobPostings() {
               No job postings match "{searchQuery}"
             </p>
           ) : (
-            filteredPostings.map((p) => (
+            paginatedPostings.map((p) => (
             <div key={p.id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 sm:px-6 py-4 border-t first:border-t-0 ${darkMode ? "border-slate-800" : "border-slate-100"}`}>
               <div>
                 <p className="font-medium">{p.title}</p>
@@ -119,7 +129,113 @@ export default function JobPostings() {
             ))
           )}
         </div>
+        
+        
       </div>
+      <div
+  className={`flex flex-col md:flex-row mt-30 items-center justify-between gap- px-6 py-4 border-t ${
+    darkMode
+      ? "border-slate-700 bg-slate-900"
+      : "border-slate-200 bg-white"
+  }`}
+>
+  <p
+    className={`text-sm ${
+      darkMode ? "text-slate-400" : "text-slate-500"
+    }`}
+  >
+    Showing{" "}
+    <span className="font-semibold">
+      {filteredPostings.length === 0 ? 0 : start + 1}
+    </span>
+    –
+    <span className="font-semibold">
+      {Math.min(end, filteredPostings.length)}
+    </span>{" "}
+    of{" "}
+    <span className="font-semibold">
+      {filteredPostings.length}
+    </span>{" "}
+    jobs
+  </p>
+
+  <div className="flex items-center gap-4">
+
+    <div className="flex items-center gap-2">
+      <span
+        className={`text-sm ${
+          darkMode ? "text-slate-400" : "text-slate-500"
+        }`}
+      >
+        Rows
+      </span>
+
+      <select
+        value={limit}
+        onChange={(e) => {
+          setLimit(Number(e.target.value));
+          setPage(1);
+        }}
+        className={`rounded-lg border px-3 py-2 text-sm ${
+          darkMode
+            ? "bg-slate-900 border-slate-700"
+            : "bg-white border-slate-300"
+        }`}
+      >
+        <option value={10}>10</option>
+        <option value={25}>25</option>
+        <option value={50}>50</option>
+      </select>
     </div>
+
+    <button
+      onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+      disabled={page === 1}
+      className={`px-4 py-2 rounded-lg border text-sm ${
+        darkMode
+          ? "border-slate-700 hover:bg-blue-500 disabled:opacity-40"
+          : "border-slate-300 hover:bg-blue-100 disabled:opacity-40"
+      }`}
+    >
+      Previous
+    </button>
+
+    <div className="flex items-center gap-2">
+      {Array.from({ length: totalPages }, (_, index) => (
+        <button
+          key={index + 1}
+          onClick={() => setPage(index + 1)}
+          className={`w-10 h-10 rounded-lg text-sm font-semibold transition ${
+            page === index + 1
+              ? "bg-blue-600 text-white"
+              : darkMode
+              ? "bg-slate-800 hover:bg-slate-700"
+              : "bg-gray-100 hover:bg-gray-200"
+          }`}
+        >
+          {index + 1}
+        </button>
+      ))}
+    </div>
+
+    <button
+      onClick={() =>
+        setPage((prev) => Math.min(prev + 1, totalPages))
+      }
+      disabled={page === totalPages}
+      className={`px-4 py-2 rounded-lg border text-sm ${
+        darkMode
+          ? "border-slate-700 hover:bg-blue-500 disabled:opacity-40"
+          : "border-slate-300 hover:bg-blue-100 disabled:opacity-40"
+      }`}
+    >
+      Next
+    </button>
+  </div>
+</div>
+      
+      
+    </div>
+    
   );
 }

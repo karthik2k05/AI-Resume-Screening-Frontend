@@ -11,17 +11,25 @@ export default function Candidates() {
 const [page, setPage] = useState(1);
 
 const [totalPages, setTotalPages] = useState(1);
+const [limit, setLimit] = useState(10);
+ const [totalRecords, setTotalRecords] = useState(0);
+  const start = (page - 1) * limit + 1;
+
+  const end = Math.min(page * limit, totalRecords);
+
+
 useEffect(() => {
 
   const fetchCandidates = async () => {
 
     try {
 
-      const res = await AdminAPI.getCandidates(page,10);
+      const res = await AdminAPI.getCandidates(page,limit);
 
       setCandidates(res.data.data);
 
       setTotalPages(res.data.pagination.totalPages);
+      setTotalRecords(res.data.pagination.totalRecords);
 
     } catch (err) {
 
@@ -33,7 +41,7 @@ useEffect(() => {
 
   fetchCandidates();
 
-}, [page]);
+}, [page, limit]);
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
 
   const filteredCandidates = useMemo(() => {
@@ -166,6 +174,101 @@ useEffect(() => {
           </table>
         </div>
       </div>
+      <div
+  className={`flex flex-col md:flex-row items-center justify-between gap-4 px-6 py-4 ${
+    darkMode ? "bg-slate-900" : "bg-white"
+  }`}
+>
+  {/* Showing Records */}
+  <p
+    className={`text-sm ${
+      darkMode ? "text-slate-400" : "text-slate-500"
+    }`}
+  >
+    Showing <span className="font-semibold">{start}</span>–
+    <span className="font-semibold">{end}</span> of{" "}
+    <span className="font-semibold">{totalRecords}</span> candidates
+  </p>
+
+  {/* Right Side */}
+  <div className="flex items-center gap-4">
+
+    {/* Rows Per Page */}
+    <div className="flex items-center gap-2">
+      <span
+        className={`text-sm ${
+          darkMode ? "text-slate-400" : "text-slate-500"
+        }`}
+      >
+        Rows
+      </span>
+
+      <select
+        value={limit}
+        onChange={(e) => {
+          setLimit(Number(e.target.value));
+          setPage(1);
+        }}
+        className={`rounded-lg border px-3 py-2 text-sm ${
+          darkMode
+            ? "bg-slate-900 border-slate-700"
+            : "bg-white border-slate-300"
+        }`}
+      >
+        <option value={10}>10</option>
+        <option value={25}>25</option>
+        <option value={50}>50</option>
+      </select>
     </div>
+
+    {/* Previous */}
+    <button
+      onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+      disabled={page === 1}
+      className={`px-4 py-2 rounded-lg border text-sm font-medium ${
+        darkMode
+          ? "border-slate-700 hover:bg-blue-500 disabled:opacity-40"
+          : "border-slate-300 hover:bg-blue-100 disabled:opacity-40"
+      }`}
+    >
+      Previous
+    </button>
+
+    {/* Page Numbers */}
+    <div className="flex items-center gap-2">
+      {Array.from({ length: totalPages }, (_, index) => (
+        <button
+          key={index + 1}
+          onClick={() => setPage(index + 1)}
+          className={`w-10 h-10 rounded-lg text-sm font-semibold transition ${
+            page === index + 1
+              ? "bg-blue-600 text-white"
+              : darkMode
+              ? "bg-slate-800 hover:bg-slate-700"
+              : "bg-gray-100 hover:bg-gray-200"
+          }`}
+        >
+          {index + 1}
+        </button>
+      ))}
+    </div>
+
+    {/* Next */}
+    <button
+      onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+      disabled={page === totalPages}
+      className={`px-4 py-2 rounded-lg border text-sm font-medium ${
+        darkMode
+          ? "border-slate-700 hover:bg-blue-500 disabled:opacity-40"
+          : "border-slate-300 hover:bg-blue-100 disabled:opacity-40"
+      }`}
+    >
+      Next
+    </button>
+
+  </div>
+</div>
+
+</div>
   );
 }
