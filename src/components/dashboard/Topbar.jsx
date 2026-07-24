@@ -30,8 +30,8 @@ export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searc
   if (role === "candidate") {
     const user = JSON.parse(localStorage.getItem("user"));
 
-    if (user?.user_id) {
-      socket.emit("join_candidate_room", user.user_id.toString());
+    if (user?.id) {
+      socket.emit("join_candidate_room", user.id.toString());
 
       socket.on("new_candidate_notification", (data) => {
         console.log("🔔 Candidate Notification:", data);

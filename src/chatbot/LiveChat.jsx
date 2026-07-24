@@ -27,70 +27,49 @@ export default function LiveChat({ onBack }) {
   const bottomRef = useRef(null);
 
   useEffect(() => {
-    console.log(user);
-    console.log("Candidate ID:", candidateId);
+  const joinRoom = () => {
+    console.log("Joining room:", candidateId);
 
-    socket.connect();
+    setConnected(true);
 
-    socket.on("connect", () => {
-  setConnected(true);
-
-  if (candidateId) {
     socket.emit(
       "join_candidate_room",
       candidateId.toString()
     );
+  };
+
+  if (socket.connected) {
+    joinRoom();
+  } else {
+    socket.on("connect", joinRoom);
   }
-});
-    const loadMessages = async () => {
-  try {
-    const res = await SupportAPI.get(`/messages/${candidateId}`);
 
-    const history = res.data.map((msg) => ({
-      sender: msg.sender,
-      text: msg.message,
-      time: new Date(msg.created_at).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    }));
+  socket.on("disconnect", () => {
+    setConnected(false);
+  });
 
-    setMessages(history);
-  } catch (err) {
-    console.error(err);
-  }
-};  
-  if (candidateId) {
-  loadMessages();
-}
+  socket.on("candidate_receive_message", (data) => {
+    console.log("📨 Received admin reply:", data);
 
-    socket.on("disconnect", () => {
-      setConnected(false);
-    });
+    setMessages((prev) => [
+      ...prev,
+      {
+        sender: "admin",
+        text: data.message,
+        time: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      },
+    ]);
+  });
 
-    socket.on("candidate_receive_message", (data) => {
-        console.log("📨 Received admin reply:", data);
-        
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: "admin",
-          text: data.message,
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        },
-      ]);
-    });
-
-    return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.off("candidate_receive_message");
-    };
-  }, []);
-
+  return () => {
+    socket.off("connect", joinRoom);
+    socket.off("disconnect");
+    socket.off("candidate_receive_message");
+  };
+}, [candidateId]);
   useEffect(() => {
     bottomRef.current?.scrollIntoView({
       behavior: "smooth",
