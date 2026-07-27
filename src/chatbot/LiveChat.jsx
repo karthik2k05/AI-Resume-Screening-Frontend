@@ -114,16 +114,7 @@ export default function LiveChat({ onBack }) {
 
     setInput("");
   };
-    const submitFeedback = () => {
-
-  console.log({
-    rating,
-    comments,
-  });
-
-  alert("Feedback submitted successfully!");
-
-};const submitFeedback = async () => {
+  const submitFeedback = async () => {
   try {
 
     if (rating === 0) {
