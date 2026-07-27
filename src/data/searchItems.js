@@ -30,6 +30,13 @@ export const searchItems = [
     roles: ["admin", "hr", "candidate"],
     path: "support",
   },
+  {
+    title: "Feedbacks",
+    type: "Page",
+    roles: ["admin"],
+    path: "feedbacks",
+  },
+
 
   // Candidate
   {
