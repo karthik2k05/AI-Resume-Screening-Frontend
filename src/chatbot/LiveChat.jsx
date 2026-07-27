@@ -114,13 +114,66 @@ export default function LiveChat({ onBack }) {
 
     setInput("");
   };
+    const submitFeedback = () => {
+
+  console.log({
+    rating,
+    comments,
+  });
+
+  alert("Feedback submitted successfully!");
+
+};
 
     if (showFeedback) {
   return (
-    <div className="h-[520px] flex items-center justify-center bg-white">
-      <h2 className="text-2xl font-bold text-green-600">
-        Chat ended successfully.
-      </h2>
+    <div className="h-[520px] flex items-center justify-center bg-gray-100">
+      <div className="bg-white rounded-xl shadow-lg p-6 w-[400px]">
+
+        <h2 className="text-2xl font-bold text-green-600 text-center">
+          Chat Ended
+        </h2>
+
+        <p className="text-center text-gray-600 mt-2">
+          Thank you for contacting our support.
+        </p>
+
+        <p className="text-center font-semibold mt-5">
+          How would you rate your experience?
+        </p>
+
+        <div className="flex justify-center gap-3 mt-5">
+          {[1,2,3,4,5].map((star)=>(
+            <button
+              key={star}
+              onClick={()=>setRating(star)}
+              className={`text-4xl ${
+                rating >= star
+                  ? "text-yellow-400"
+                  : "text-gray-300"
+              }`}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+
+        <textarea
+          value={comments}
+          onChange={(e)=>setComments(e.target.value)}
+          placeholder="Additional comments (optional)"
+          className="w-full border rounded-lg mt-6 p-3 resize-none"
+          rows={4}
+        />
+
+        <button
+          onClick={submitFeedback}
+          className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold"
+        >
+          Submit Feedback
+        </button>
+
+      </div>
     </div>
   );
 }
