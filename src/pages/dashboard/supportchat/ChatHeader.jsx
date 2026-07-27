@@ -1,6 +1,6 @@
 import { FaCircle, FaUserCircle } from "react-icons/fa";
 
-export default function ChatHeader({ selectedUser }) {
+export default function ChatHeader({ selectedUser,endChat }) {
   return (
     <div className="bg-blue-300 border-b border-gray-200 px-5 py-4 flex items-center justify-between shadow-sm rounded-lg">
 
@@ -16,6 +16,7 @@ export default function ChatHeader({ selectedUser }) {
           <h2 className="text-xl font-bold text-gray-800">
             {selectedUser.username}
           </h2>
+          
 
           <div className="flex items-center gap-2 mt-1">
 
@@ -28,11 +29,18 @@ export default function ChatHeader({ selectedUser }) {
               Online
             </span>
 
+
           </div>
 
         </div>
 
       </div>
+      <button
+    onClick={endChat}
+    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold font-medium transition-colors"
+  >
+    End Chat
+  </button>
 
     </div>
   );

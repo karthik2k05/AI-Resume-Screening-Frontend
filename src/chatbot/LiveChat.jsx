@@ -23,6 +23,9 @@ export default function LiveChat({ onBack }) {
 
   const [input, setInput] = useState("");
   const [connected, setConnected] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comments, setComments] = useState("");
 
   const bottomRef = useRef(null);
 
@@ -63,11 +66,17 @@ export default function LiveChat({ onBack }) {
       },
     ]);
   });
+  socket.on("candidate_chat_closed", () => {
+  console.log("Chat ended by admin");
+
+  setShowFeedback(true);
+});
 
   return () => {
     socket.off("connect", joinRoom);
     socket.off("disconnect");
     socket.off("candidate_receive_message");
+    socket.off("candidate_chat_closed");
   };
 }, [candidateId]);
   useEffect(() => {
@@ -106,7 +115,18 @@ export default function LiveChat({ onBack }) {
     setInput("");
   };
 
+    if (showFeedback) {
   return (
+    <div className="h-[520px] flex items-center justify-center bg-white">
+      <h2 className="text-2xl font-bold text-green-600">
+        Chat ended successfully.
+      </h2>
+    </div>
+  );
+}
+
+  return (
+    
     <div className="h-[520px] flex flex-col bg-gray-100">
 
       {/* Header */}

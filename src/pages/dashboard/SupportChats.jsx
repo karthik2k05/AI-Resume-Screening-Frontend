@@ -160,6 +160,15 @@ const selectedCandidateFromNotification =
 
   setInput("");
 };
+    const endChat = () => {
+  if (!selectedUser) return;
+
+  socket.emit("end_chat", {
+    candidateId: selectedUser.candidateId,
+  });
+
+  alert("Chat ended successfully.");
+};
       
 
   return (
@@ -188,6 +197,7 @@ const selectedCandidateFromNotification =
 
       <ChatHeader
   selectedUser={selectedUser}
+  endChat={endChat}
 />
 
       {/* Messages */}
