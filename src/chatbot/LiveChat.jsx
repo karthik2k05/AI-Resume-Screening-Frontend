@@ -26,6 +26,7 @@ export default function LiveChat({ onBack }) {
   const [showFeedback, setShowFeedback] = useState(false);
   const [rating, setRating] = useState(0);
   const [comments, setComments] = useState("");
+  const [showThankYou, setShowThankYou] = useState(false);
 
   const bottomRef = useRef(null);
 
@@ -128,9 +129,8 @@ export default function LiveChat({ onBack }) {
       comments,
     });
 
-    alert("Thank you for your feedback!");
-
     setShowFeedback(false);
+    setShowThankYou(true);
 
   } catch (err) {
     console.error(err);
@@ -138,6 +138,37 @@ export default function LiveChat({ onBack }) {
     alert("Failed to submit feedback.");
   }
 };
+
+    if (showThankYou) {
+  return (
+    <div className="h-[520px] flex items-center justify-center bg-gray-100">
+      <div className="bg-white rounded-xl shadow-lg p-8 w-[400px] text-center">
+
+        <div className="text-6xl mb-4">✅</div>
+
+        <h2 className="text-2xl font-bold text-green-600">
+          Thank You!
+        </h2>
+
+        <p className="text-gray-600 mt-4">
+          Your feedback has been submitted successfully.
+        </p>
+
+        <p className="text-gray-500 mt-2">
+          We appreciate your valuable feedback.
+        </p>
+
+        <button
+          onClick={onBack}
+          className="mt-8 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold"
+        >
+          Close
+        </button>
+
+      </div>
+    </div>
+  );
+}
 
     if (showFeedback) {
   return (
