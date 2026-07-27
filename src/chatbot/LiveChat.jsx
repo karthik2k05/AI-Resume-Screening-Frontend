@@ -123,6 +123,29 @@ export default function LiveChat({ onBack }) {
 
   alert("Feedback submitted successfully!");
 
+};const submitFeedback = async () => {
+  try {
+
+    if (rating === 0) {
+      alert("Please select a rating.");
+      return;
+    }
+
+    await SupportAPI.post("/feedback", {
+      candidateId,
+      rating,
+      comments,
+    });
+
+    alert("Thank you for your feedback!");
+
+    setShowFeedback(false);
+
+  } catch (err) {
+    console.error(err);
+
+    alert("Failed to submit feedback.");
+  }
 };
 
     if (showFeedback) {
