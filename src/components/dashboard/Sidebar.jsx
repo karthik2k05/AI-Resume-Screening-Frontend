@@ -11,6 +11,7 @@ import {
   LogOut,
   FileText,
   MessageSquare,
+  Star,
 } from "lucide-react";
 
 function navFor(role) {
@@ -32,7 +33,7 @@ function navFor(role) {
 
     // NEW
     { label: "Support Chats", icon: MessageSquare, to: `${base}/support` },
-
+    { label: "Feedbacks", icon: Star, to: `${base}/feedbacks` },
     { label: "Settings", icon: Settings, to: `${base}/settings` },
   ];
 }

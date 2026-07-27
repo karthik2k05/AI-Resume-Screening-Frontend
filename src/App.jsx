@@ -12,6 +12,7 @@ import Applications from "./pages/dashboard/Applications";
 import JobMatches from "./pages/dashboard/JobMatches";
 import Settings from "./pages/dashboard/Settings";
 import SupportChats from "./pages/dashboard/SupportChats";
+import Feedbacks from "./pages/dashboard/Feedbacks";
 import ChatBot from "./chatbot/ChatBot";
 
 
@@ -48,6 +49,8 @@ function App() {
           <Route path="jobs" element={<JobPostings />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="support" element={<SupportChats />} />
+          <Route path="feedbacks" element={<Feedbacks />} />
+
           {/* candidate */}
           <Route path="applications" element={<Applications />} />
           <Route path="matches" element={<JobMatches />} />
