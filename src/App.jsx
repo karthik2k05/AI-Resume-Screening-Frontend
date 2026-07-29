@@ -8,6 +8,7 @@ import Overview from "./pages/dashboard/Overview";
 import Candidates from "./pages/dashboard/Candidates";
 import JobPostings from "./pages/dashboard/JobPostings";
 import Analytics from "./pages/dashboard/Analytics";
+import ResumeScreening from "./pages/dashboard/ResumeScreening";
 import Applications from "./pages/dashboard/Applications";
 import JobMatches from "./pages/dashboard/JobMatches";
 import Settings from "./pages/dashboard/Settings";
@@ -47,6 +48,7 @@ function App() {
           {/* admin / hr */}
           <Route path="candidates" element={<Candidates />} />
           <Route path="jobs" element={<JobPostings />} />
+          <Route path="screening" element={<ResumeScreening />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="support" element={<SupportChats />} />
           <Route path="feedbacks" element={<Feedbacks />} />

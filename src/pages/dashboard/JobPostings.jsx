@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Plus, X, Check } from "lucide-react";
-import { INITIAL_POSTINGS } from "../../data/mockDashboardData";
+import { extractJDKeywords } from "../../lib/jdMatcher";
 
 export default function JobPostings() {
-  const { darkMode, searchQuery } = useOutletContext();
-  const [postings, setPostings] = useState(INITIAL_POSTINGS);
+  const { darkMode, searchQuery,postings, setPostings } = useOutletContext();
   const [showNewJob, setShowNewJob] = useState(false);
+  const [newJobDescription, setNewJobDescription] = useState("");  
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   
@@ -19,6 +19,7 @@ export default function JobPostings() {
     if (!q) return postings;
     return postings.filter((p) => p.title.toLowerCase().includes(q) || p.dept.toLowerCase().includes(q));
   }, [postings, searchQuery]);
+
   const totalPages = Math.ceil(filteredPostings.length / limit);
 
 const start = (page - 1) * limit;
@@ -27,14 +28,27 @@ const end = start + limit;
 
 const paginatedPostings = filteredPostings.slice(start, end);
 
-  const addJobPosting = () => {
+const addJobPosting = () => {
     if (!newJobTitle.trim() || !newJobDept.trim()) return;
+    // Auto-derive key skills from the pasted description so this
+    // posting is immediately usable for JD-based resume screening,
+    // even without manually tagging skills.
+    const { requiredSkills } = extractJDKeywords(newJobDescription);
     setPostings((prev) => [
-      { id: Date.now(), title: newJobTitle.trim(), dept: newJobDept.trim(), applicants: 0, status: "Open" },
+      {
+        id: Date.now(),
+        title: newJobTitle.trim(),
+        dept: newJobDept.trim(),
+        applicants: 0,
+        status: "Open",
+        description: newJobDescription.trim(),
+        keySkills: requiredSkills,
+      },
       ...prev,
     ]);
     setNewJobTitle("");
     setNewJobDept("");
+    setNewJobDescription("");
     setShowNewJob(false);
   };
 
@@ -86,6 +100,17 @@ const paginatedPostings = filteredPostings.slice(start, end);
               }`}
             />
           </div>
+          <div className="mt-4">
+            <textarea
+              value={newJobDescription}
+              onChange={(e) => setNewJobDescription(e.target.value)}
+              placeholder="Paste or write the job description here — required skills and keywords are picked up automatically for resume screening."
+              rows={4}
+              className={`w-full rounded-lg px-3 py-2.5 text-sm outline-none border focus:ring-2 focus:ring-blue-500 resize-y ${
+                darkMode ? "bg-slate-800 border-slate-700" : "bg-slate-50 border-slate-300"
+              }`}
+            />
+          </div>
           <button onClick={addJobPosting} className="mt-4 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors">
             <Check size={16} />
             Publish Posting
@@ -106,6 +131,7 @@ const paginatedPostings = filteredPostings.slice(start, end);
                 <p className="font-medium">{p.title}</p>
                 <p className={`text-xs mt-0.5 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
                   {p.dept} · {p.applicants} applicants
+                  {p.keySkills?.length ? ` · ${p.keySkills.slice(0, 4).join(", ")}` : ""}
                 </p>
               </div>
               <div className="flex items-center gap-3">

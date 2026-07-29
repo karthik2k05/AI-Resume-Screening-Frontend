@@ -1,14 +1,29 @@
-import { useMemo, useState } from "react";
-import { useOutletContext } from "react-router-dom";
-import { MapPin, Check } from "lucide-react";
+import { useMemo, useState,useEffect } from "react";
+import { useOutletContext,Link } from "react-router-dom";
+import { MapPin, Check,FileSearch,CheckCircle2,XCircle } from "lucide-react";
 import { RECOMMENDED_JOBS } from "../../data/mockDashboardData";
+import { getLastAnalysis } from "../../lib/resumeStorage";
+import { scoreResumeAgainstJD } from "../../lib/jdMatcher";
 
 export default function JobMatches() {
   const { darkMode, searchQuery } = useOutletContext();
   const [appliedJobs, setAppliedJobs] = useState([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [resume, setResume] = useState(null);
+  const [jdText, setJdText] = useState("");
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
+    useEffect(() => {
+    setResume(getLastAnalysis());
+  }, []);
+
+  const jdMatch = useMemo(() => {
+    if (!resume || !jdText.trim()) return null;
+    return scoreResumeAgainstJD(
+      { matchedSkills: resume.matchedSkills, text: resume.text, atsScore: resume.score.overall },
+      jdText
+    );
+  }, [resume, jdText]);
 
   const applyToJob = (id) => setAppliedJobs((prev) => [...prev, id]);
 
@@ -36,6 +51,79 @@ const paginatedJobs = filteredJobs.slice(start, end);
         <p className={`mt-1 text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
           Based on your resume and skill match.
         </p>
+      </div>
+      {/* Check fit against a specific job description */}
+      <div className={`rounded-2xl border p-5 sm:p-6 ${cardBg}`}>
+        <div className="flex items-center gap-2 mb-1">
+          <FileSearch size={18} className="text-blue-600" />
+          <h3 className="font-semibold">Check your fit for a specific role</h3>
+        </div>
+        <p className={`text-xs mb-4 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
+          Paste any job description to see exactly how your uploaded resume matches it.
+        </p>
+
+        {!resume ? (
+          <p className={`text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
+            You haven't uploaded a resume yet —{" "}
+            <Link to=".." className="text-blue-600 font-semibold hover:underline">
+              upload one from your Overview page
+            </Link>{" "}
+            first, then come back to check it against a job description.
+          </p>
+        ) : (
+          <>
+            <textarea
+              value={jdText}
+              onChange={(e) => setJdText(e.target.value)}
+              placeholder="Paste a job description here..."
+              rows={4}
+              className={`w-full rounded-lg px-3 py-2.5 text-sm outline-none border focus:ring-2 focus:ring-blue-500 resize-y ${
+                darkMode ? "bg-slate-800 border-slate-700" : "bg-slate-50 border-slate-300"
+              }`}
+            />
+
+            {jdMatch && (
+              <div className="grid sm:grid-cols-3 gap-4 mt-4">
+                <div className={`rounded-xl border p-4 flex flex-col items-center justify-center text-center ${darkMode ? "bg-slate-950/50 border-slate-800" : "bg-slate-50 border-slate-200"}`}>
+                  <p className={`text-xs font-medium ${darkMode ? "text-slate-500" : "text-slate-400"}`}>Match score</p>
+                  <p className={`text-3xl font-bold mt-1 ${jdMatch.combined >= 85 ? "text-emerald-600" : jdMatch.combined >= 65 ? "text-amber-600" : "text-rose-600"}`}>
+                    {jdMatch.combined}%
+                  </p>
+                </div>
+                <div>
+                  <p className={`text-xs font-semibold mb-2 ${darkMode ? "text-slate-400" : "text-slate-500"}`}>You have</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[...jdMatch.matchedRequired, ...jdMatch.matchedExtra].length === 0 ? (
+                      <span className={`text-xs ${darkMode ? "text-slate-500" : "text-slate-400"}`}>No overlap found yet</span>
+                    ) : (
+                      [...jdMatch.matchedRequired, ...jdMatch.matchedExtra].map((skill) => (
+                        <span key={skill} className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                          <CheckCircle2 size={11} />
+                          {skill}
+                        </span>
+                      ))
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <p className={`text-xs font-semibold mb-2 ${darkMode ? "text-slate-400" : "text-slate-500"}`}>Consider adding</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[...jdMatch.missingRequired, ...jdMatch.missingExtra].length === 0 ? (
+                      <span className="text-xs font-medium text-emerald-600">Full match!</span>
+                    ) : (
+                      [...jdMatch.missingRequired, ...jdMatch.missingExtra].map((skill) => (
+                        <span key={skill} className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${darkMode ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-500"}`}>
+                          <XCircle size={11} />
+                          {skill}
+                        </span>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       <div className={`rounded-2xl border ${cardBg} overflow-hidden`}>

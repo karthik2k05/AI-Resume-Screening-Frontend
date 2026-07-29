@@ -10,6 +10,7 @@ import {
   X,
   LogOut,
   FileText,
+  ScanLine,
   MessageSquare,
   Star,
 } from "lucide-react";
@@ -28,6 +29,7 @@ function navFor(role) {
   return [
     { label: "Overview", icon: LayoutDashboard, to: base, end: true },
     { label: "Candidates", icon: Users, to: `${base}/candidates` },
+    { label: "Resume Screening", icon: ScanLine, to: `${base}/screening` },
     { label: "Job Postings", icon: Briefcase, to: `${base}/jobs` },
     { label: "Analytics", icon: ChartColumn, to: `${base}/analytics` },
 
@@ -42,6 +44,7 @@ if (role === "hr") {
   return [
     { label: "Overview", icon: LayoutDashboard, to: base, end: true },
     { label: "Candidates", icon: Users, to: `${base}/candidates` },
+    { label: "Resume Screening", icon: ScanLine, to: `${base}/screening` },
     { label: "Job Postings", icon: Briefcase, to: `${base}/jobs` },
     { label: "Analytics", icon: ChartColumn, to: `${base}/analytics` },
     { label: "Settings", icon: Settings, to: `${base}/settings` },

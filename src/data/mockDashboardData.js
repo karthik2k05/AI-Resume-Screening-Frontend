@@ -41,11 +41,56 @@ export const INITIAL_CANDIDATES = [
 ];
 
 export const INITIAL_POSTINGS = [
-  { id: 1, title: "Senior Frontend Developer", dept: "Engineering", applicants: 142, status: "Open" },
-  { id: 2, title: "Backend Engineer (Node.js)", dept: "Engineering", applicants: 98, status: "Open" },
-  { id: 3, title: "UX Designer", dept: "Design", applicants: 61, status: "Open" },
-  { id: 4, title: "DevOps Engineer", dept: "Infrastructure", applicants: 47, status: "Closed" },
-  { id: 5, title: "Product Manager", dept: "Product", applicants: 73, status: "Open" },
+  {
+    id: 1,
+    title: "Senior Frontend Developer",
+    dept: "Engineering",
+    applicants: 142,
+    status: "Open",
+    keySkills: ["React", "JavaScript", "TypeScript", "CSS", "Git"],
+    description:
+      "We're looking for a Senior Frontend Developer to build responsive, accessible web applications. You'll work daily with React, JavaScript, and TypeScript, writing clean CSS and collaborating through Git. Experience with REST APIs and testing frameworks like Jest is a strong plus. You should be comfortable with agile/scrum ceremonies and have strong communication skills working cross-functionally with design and backend teams.",
+  },
+  {
+    id: 2,
+    title: "Backend Engineer (Node.js)",
+    dept: "Engineering",
+    applicants: 98,
+    status: "Open",
+    keySkills: ["Node.js", "SQL", "MongoDB", "REST APIs", "Docker"],
+    description:
+      "Backend Engineer role focused on building scalable services in Node.js. You'll design REST APIs, work with both SQL and MongoDB databases, and containerize services with Docker. Familiarity with CI/CD pipelines and Git-based workflows is expected. We value strong problem solving skills and clear communication in a distributed team.",
+  },
+  {
+    id: 3,
+    title: "UX Designer",
+    dept: "Design",
+    applicants: 61,
+    status: "Open",
+    keySkills: ["Communication", "Testing", "Agile/Scrum"],
+    description:
+      "UX Designer to lead user research, wireframing, and usability testing across our product. You'll partner closely with engineering in an agile/scrum environment, present findings with strong communication, and iterate designs based on testing feedback. Familiarity with design systems and accessibility standards preferred.",
+  },
+  {
+    id: 4,
+    title: "DevOps Engineer",
+    dept: "Infrastructure",
+    applicants: 47,
+    status: "Closed",
+    keySkills: ["Docker", "Kubernetes", "AWS", "CI/CD", "Git"],
+    description:
+      "DevOps Engineer to own our cloud infrastructure on AWS. You'll manage Kubernetes clusters, Docker containers, and build out CI/CD pipelines. Strong Git workflow experience and scripting ability required. Experience with monitoring and incident response is a plus.",
+  },
+  {
+    id: 5,
+    title: "Product Manager",
+    dept: "Product",
+    applicants: 73,
+    status: "Open",
+    keySkills: ["Agile/Scrum", "Communication", "Leadership", "Problem Solving"],
+    description:
+      "Product Manager to drive roadmap and execution in an agile/scrum environment. You'll need excellent communication and leadership skills to align engineering, design, and business stakeholders, along with strong problem solving to prioritize the right bets. Prior experience shipping consumer or B2B SaaS products preferred.",
+  },
 ];
 
 export const STATUS_STYLES = {
