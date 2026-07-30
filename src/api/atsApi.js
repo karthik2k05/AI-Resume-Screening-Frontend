@@ -2,6 +2,8 @@
 // /backend folder). All resume parsing, scoring, JD matching, and storage
 // now happens server-side — this file just calls the API.
 const API_BASE = import.meta.env.VITE_ATS_API_URL || "http://localhost:5000";
+console.log("ATS API URL:", import.meta.env.VITE_ATS_API_URL);
+console.log("API_BASE:", API_BASE);
 
 async function handleResponse(res) {
   let data;
