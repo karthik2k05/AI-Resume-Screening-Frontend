@@ -2,7 +2,7 @@ import { useMemo, useState,useEffect } from "react";
 import { useOutletContext,Link } from "react-router-dom";
 import { MapPin, Check,FileSearch,CheckCircle2,XCircle } from "lucide-react";
 import { RECOMMENDED_JOBS } from "../../data/mockDashboardData";
-import { getResumeByHash } from "../../lib/atsApi";
+import { getResumeByHash } from "../../api/atsApi";
 
 const MY_LAST_RESUME_HASH_KEY = "resumeiq_my_last_resume_hash";
 

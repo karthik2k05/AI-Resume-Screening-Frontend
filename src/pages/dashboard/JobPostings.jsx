@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Plus, X, Check } from "lucide-react";
-import { extractJDKeywords } from "../../lib/jdMatcher";
+import { extractJDKeywords } from "../../api/atsApi";
 
 export default function JobPostings() {
   const { darkMode, searchQuery,postings, setPostings } = useOutletContext();
@@ -28,7 +28,7 @@ const end = start + limit;
 
 const paginatedPostings = filteredPostings.slice(start, end);
 
-const addJobPosting = () => {
+const addJobPosting = async () => {
     if (!newJobTitle.trim() || !newJobDept.trim()) return;
     // Auto-derive key skills from the pasted description so this
     // posting is immediately usable for JD-based resume screening,

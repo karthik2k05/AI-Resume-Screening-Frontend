@@ -12,7 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { uploadResumeBatch, getResumes, removeResume, clearResumes } from "../../lib/atsApi";
+import { uploadResumeBatch, getResumes, removeResume, clearResumes } from "../../api/atsApi";
 
 const TOP_N_OPTIONS = [5, 10, 20, "All"];
 const RANK_STYLES = [
