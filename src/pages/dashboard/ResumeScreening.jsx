@@ -12,15 +12,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { analyzeResume } from "../../lib/resumeParser";
-import { scoreResumeAgainstJD } from "../../lib/jdMatcher";
-import {
-  getHrBatch,
-  findHrBatchByHash,
-  saveHrBatchEntry,
-  removeHrBatchEntry,
-  clearHrBatch,
-} from "../../lib/resumeStorage";
+import { uploadResumeBatch, getResumes, removeResume, clearResumes } from "../../lib/atsApi";
 
 const TOP_N_OPTIONS = [5, 10, 20, "All"];
 const RANK_STYLES = [
@@ -30,11 +22,12 @@ const RANK_STYLES = [
 ];
 
 export default function ResumeScreening() {
-  const { darkMode, candidates, setCandidates, postings } = useOutletContext();
+  const { darkMode, setCandidates, postings } = useOutletContext();
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
   const fileInputRef = useRef(null);
 
-  const [batch, setBatch] = useState([]);
+  const [ranked, setRanked] = useState([]);
+  const [loadingList, setLoadingList] = useState(true);
   const [selectedPostingId, setSelectedPostingId] = useState("");
   const [jdText, setJdText] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -45,9 +38,33 @@ export default function ResumeScreening() {
   const [addedHashes, setAddedHashes] = useState(new Set());
   const [expandedHash, setExpandedHash] = useState(null);
 
+  // Every stored resume already lives on the ATS backend (see /backend) —
+  // this just asks it, re-ranked server-side, for whatever's in the JD
+  // box right now. Nothing is baked in at upload time, so editing the
+  // text or switching postings re-ranks on the next fetch.
+  const refreshRanked = async (jd = jdText) => {
+    setLoadingList(true);
+    try {
+      const resumes = await getResumes(jd);
+      setRanked(resumes);
+    } catch (err) {
+      setFileErrors([{ fileName: "", message: err.message || "Couldn't load stored resumes from the backend." }]);
+    } finally {
+      setLoadingList(false);
+    }
+  };
+
   useEffect(() => {
-    setBatch(getHrBatch());
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional fetch-on-mount
+    refreshRanked("");
   }, []);
+
+  // Debounce re-ranking while HR is actively typing/editing the JD text.
+  useEffect(() => {
+    const timeout = setTimeout(() => refreshRanked(jdText), 350);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jdText]);
 
   const selectedPosting = useMemo(
     () => postings.find((p) => p.id === Number(selectedPostingId)) || null,
@@ -63,22 +80,6 @@ export default function ResumeScreening() {
     setJdText(posting?.description || "");
   };
 
-  // Re-scores every stored resume against whatever's currently in the
-  // JD box — nothing is baked in at upload time, so editing the text
-  // or switching postings re-ranks instantly.
-  const ranked = useMemo(() => {
-    const trimmedJD = jdText.trim();
-    return batch
-      .map((entry) => {
-        if (!trimmedJD) {
-          return { ...entry, displayScore: entry.atsScore, jdMatch: null };
-        }
-        const jdMatch = scoreResumeAgainstJD(entry, trimmedJD);
-        return { ...entry, jdMatch, displayScore: jdMatch.combined };
-      })
-      .sort((a, b) => b.displayScore - a.displayScore);
-  }, [batch, jdText]);
-
   const topCandidates = ranked.slice(0, 3);
   const tableRows = topN === "All" ? ranked : ranked.slice(0, topN);
 
@@ -91,45 +92,20 @@ export default function ResumeScreening() {
     setDuplicateNames([]);
     setProgress({ current: 0, total: files.length });
 
-    const errors = [];
-    const duplicates = [];
-    let completed = 0;
-
-    // All selected files are analyzed concurrently (not one at a time) —
-    // progress reflects however many have finished so far, regardless
-    // of which order they complete in.
-    await Promise.allSettled(
-      files.map(async (file) => {
-        try {
-          const analysis = await analyzeResume(file);
-          const alreadySeen = !!findHrBatchByHash(analysis.hash);
-          if (alreadySeen) duplicates.push(analysis.fileName);
-
-          saveHrBatchEntry({
-            hash: analysis.hash,
-            fileName: analysis.fileName,
-            candidateName: analysis.candidateName,
-            analyzedAt: analysis.analyzedAt,
-            atsScore: analysis.score.overall,
-            text: analysis.text,
-            matchedSkills: analysis.matchedSkills,
-            missingSkills: analysis.missingSkills,
-            formatting: analysis.formatting,
-          });
-        } catch (err) {
-          errors.push({ fileName: file.name, message: err.message || "Couldn't analyze this file." });
-        } finally {
-          completed += 1;
-          setProgress({ current: completed, total: files.length });
-        }
-      })
-    );
-
-    setBatch(getHrBatch());
-    setFileErrors(errors);
-    setDuplicateNames(duplicates);
-    setProcessing(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    try {
+      // The backend analyzes and persists every file (extraction, ATS
+      // scoring, and storage all happen server-side now).
+      const { errors, duplicates } = await uploadResumeBatch(files);
+      setFileErrors(errors || []);
+      setDuplicateNames(duplicates || []);
+    } catch (err) {
+      setFileErrors([{ fileName: "", message: err.message || "Couldn't upload resumes to the backend." }]);
+    } finally {
+      setProgress({ current: files.length, total: files.length });
+      await refreshRanked();
+      setProcessing(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const addToPipeline = (entry) => {
@@ -147,15 +123,16 @@ export default function ResumeScreening() {
     setAddedHashes((prev) => new Set(prev).add(entry.hash));
   };
 
-  const removeEntry = (hash) => {
-    setBatch(removeHrBatchEntry(hash));
+  const removeEntry = async (hash) => {
+    await removeResume(hash);
+    await refreshRanked();
   };
 
-  const handleClearAll = () => {
-    if (batch.length === 0) return;
-    if (!confirm(`Remove all ${batch.length} screened resumes? This can't be undone.`)) return;
-    clearHrBatch();
-    setBatch([]);
+  const handleClearAll = async () => {
+    if (ranked.length === 0) return;
+    if (!confirm(`Remove all ${ranked.length} screened resumes? This can't be undone.`)) return;
+    await clearResumes();
+    setRanked([]);
   };
 
   const clearFilter = () => {
@@ -172,7 +149,7 @@ export default function ResumeScreening() {
             Upload resumes in bulk and filter them by job description to get a ranked shortlist.
           </p>
         </div>
-        {batch.length > 0 && (
+        {ranked.length > 0 && (
           <button
             onClick={handleClearAll}
             className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors self-start ${
@@ -180,7 +157,7 @@ export default function ResumeScreening() {
             }`}
           >
             <Trash2 size={14} />
-            Clear all ({batch.length})
+            Clear all ({ranked.length})
           </button>
         )}
       </div>
@@ -277,11 +254,18 @@ export default function ResumeScreening() {
         </div>
       )}
 
-      {batch.length === 0 && !processing && (
+      {ranked.length === 0 && !processing && !loadingList && (
         <div className={`rounded-2xl border p-10 text-center ${cardBg}`}>
           <p className={`text-sm ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
             No resumes screened yet — upload a batch of .pdf or .docx files above to get a ranked shortlist.
           </p>
+        </div>
+      )}
+
+      {loadingList && ranked.length === 0 && (
+        <div className={`rounded-2xl border p-10 text-center flex items-center justify-center gap-2 ${cardBg}`}>
+          <Loader2 size={16} className="animate-spin" />
+          <p className={`text-sm ${darkMode ? "text-slate-500" : "text-slate-400"}`}>Loading screened resumes...</p>
         </div>
       )}
 

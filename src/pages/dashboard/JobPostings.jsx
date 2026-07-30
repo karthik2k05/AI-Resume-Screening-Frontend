@@ -33,7 +33,15 @@ const addJobPosting = () => {
     // Auto-derive key skills from the pasted description so this
     // posting is immediately usable for JD-based resume screening,
     // even without manually tagging skills.
-    const { requiredSkills } = extractJDKeywords(newJobDescription);
+     let requiredSkills = [];
+    try {
+      const result = await extractJDKeywords(newJobDescription);
+      requiredSkills = result.requiredSkills;
+    } catch {
+      // If the backend is unreachable, still let HR publish the
+      // posting — it just won't have auto-tagged key skills yet.
+      requiredSkills = [];
+    }
     setPostings((prev) => [
       {
         id: Date.now(),
