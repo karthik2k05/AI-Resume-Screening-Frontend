@@ -33,6 +33,7 @@ export default function JobPostings() {
       searchQuery
     );
 
+
     const jobs = response.data.jobs.map((job) => ({
       id: job.id,
       title: job.title,
@@ -47,14 +48,14 @@ export default function JobPostings() {
     }));
 
     setPostings(jobs);
+    setPagination(response.data.pagination);
 
   } catch (error) {
 
     console.error(error);
 
   }
-  setPostings(jobs);
-setPagination(response.data.pagination);
+ 
 };
     useEffect(() => {
 
@@ -213,34 +214,36 @@ const addJobPosting = async () => {
         
       </div>
       <div
-  className={`flex flex-col md:flex-row mt-30 items-center justify-between gap- px-6 py-4 border-t ${
+  className={`flex flex-col md:flex-row mt-6 items-center justify-between gap- px-6 py-4 border-t ${
     darkMode
       ? "border-slate-700 bg-slate-900"
       : "border-slate-200 bg-white"
   }`}
 >
-  <p
-    className={`text-sm ${
-      darkMode ? "text-slate-400" : "text-slate-500"
-    }`}
-  >
-    Showing{" "}
-    <span className="font-semibold">
-      {(pagination.currentPage - 1) * pagination.limit + 1}
-    </span>
-    –
-    <span className="font-semibold">
-      {Math.min(
-    pagination.currentPage * pagination.limit,
-    pagination.totalRecords
-)}
-    </span>{" "}
-    of{" "}
-    <span className="font-semibold">
-      {pagination.totalRecords}
-    </span>{" "}
-    jobs
-  </p>
+<p
+  className={`text-sm ${
+    darkMode ? "text-slate-400" : "text-slate-500"
+  }`}
+>
+  Showing{" "}
+  <span className="font-semibold">
+    {pagination.totalRecords === 0
+      ? 0
+      : (pagination.currentPage - 1) * pagination.limit + 1}
+  </span>
+  –
+  <span className="font-semibold">
+    {Math.min(
+      pagination.currentPage * pagination.limit,
+      pagination.totalRecords
+    )}
+  </span>{" "}
+  of{" "}
+  <span className="font-semibold">
+    {pagination.totalRecords}
+  </span>{" "}
+  jobs
+</p>
 
   <div className="flex items-center gap-4">
 
