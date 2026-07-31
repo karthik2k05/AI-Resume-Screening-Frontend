@@ -19,8 +19,8 @@ import axios from "axios";
 
 export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
-  const openPostings = overview?.statistics?.activeJobPostings ?? 0;
   const [overview, setOverview] = useState(null);
+  const openPostings = overview?.statistics?.activeJobPostings ?? 0;
   useEffect(() => {
   const fetchOverview = async () => {
     try {
