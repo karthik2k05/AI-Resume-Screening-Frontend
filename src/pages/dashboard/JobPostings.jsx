@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Plus, X, Check } from "lucide-react";
-import { extractJDKeywords } from "../../api/atsApi";
+import { extractJDKeywords } from "../../lib/jdMatcher";
 
 export default function JobPostings() {
   const { darkMode, searchQuery,postings, setPostings } = useOutletContext();
@@ -28,20 +28,12 @@ const end = start + limit;
 
 const paginatedPostings = filteredPostings.slice(start, end);
 
-const addJobPosting = async () => {
+const addJobPosting = () => {
     if (!newJobTitle.trim() || !newJobDept.trim()) return;
     // Auto-derive key skills from the pasted description so this
     // posting is immediately usable for JD-based resume screening,
     // even without manually tagging skills.
-     let requiredSkills = [];
-    try {
-      const result = await extractJDKeywords(newJobDescription);
-      requiredSkills = result.requiredSkills;
-    } catch {
-      // If the backend is unreachable, still let HR publish the
-      // posting — it just won't have auto-tagged key skills yet.
-      requiredSkills = [];
-    }
+    const { requiredSkills } = extractJDKeywords(newJobDescription);
     setPostings((prev) => [
       {
         id: Date.now(),

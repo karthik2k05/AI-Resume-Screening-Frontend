@@ -2,9 +2,8 @@ import { useMemo, useState,useEffect } from "react";
 import { useOutletContext,Link } from "react-router-dom";
 import { MapPin, Check,FileSearch,CheckCircle2,XCircle } from "lucide-react";
 import { RECOMMENDED_JOBS } from "../../data/mockDashboardData";
-import { getResumeByHash } from "../../api/atsApi";
-
-const MY_LAST_RESUME_HASH_KEY = "resumeiq_my_last_resume_hash";
+import { getLastAnalysis } from "../../lib/resumeStorage";
+import { scoreResumeAgainstJD } from "../../lib/jdMatcher";
 
 export default function JobMatches() {
   const { darkMode, searchQuery } = useOutletContext();
@@ -13,20 +12,17 @@ export default function JobMatches() {
   const [limit, setLimit] = useState(10);
   const [resume, setResume] = useState(null);
   const [jdText, setJdText] = useState("");
-  const [jdMatch, setJdMatch] = useState(null);
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
     useEffect(() => {
-    if (!resume || !jdText.trim()) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting derived state, not fetching
-      setJdMatch(null);
-      return;
-    }
-    const timeout = setTimeout(() => {
-      getResumeByHash(resume.hash, jdText)
-        .then((updated) => setJdMatch(updated.jdMatch))
-        .catch(() => setJdMatch(null));
-    }, 350);
-    return () => clearTimeout(timeout);
+    setResume(getLastAnalysis());
+  }, []);
+
+  const jdMatch = useMemo(() => {
+    if (!resume || !jdText.trim()) return null;
+    return scoreResumeAgainstJD(
+      { matchedSkills: resume.matchedSkills, text: resume.text, atsScore: resume.score.overall },
+      jdText
+    );
   }, [resume, jdText]);
 
   const applyToJob = (id) => setAppliedJobs((prev) => [...prev, id]);

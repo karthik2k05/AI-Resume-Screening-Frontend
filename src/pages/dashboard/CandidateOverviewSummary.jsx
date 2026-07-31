@@ -23,8 +23,9 @@ import {
   XCircle,
   FileText,
 } from "lucide-react";
-import { analyzeResume, getResumeByHash } from "../../api/atsApi";
-const MY_LAST_RESUME_HASH_KEY = "resumeiq_my_last_resume_hash";
+import { analyzeResume } from "../../lib/resumeParser";
+import { findAnalysisByHash, saveAnalysis, getLastAnalysis } from "../../lib/resumeStorage";
+
 function scoreLabel(score) {
   if (score >= 85) return "Strong ATS match — this resume should pass most automated screens.";
   if (score >= 65) return "Decent match, but a few gaps could hold it back with certain ATS filters.";
@@ -42,11 +43,7 @@ export default function CandidateOverviewSummary({ darkMode }) {
   const [duplicateNotice, setDuplicateNotice] = useState("");
 
   useEffect(() => {
-    const lastHash = localStorage.getItem(MY_LAST_RESUME_HASH_KEY);
-    if (!lastHash) return;
-    getResumeByHash(lastHash)
-      .then(setAnalysis)
-      .catch(() => localStorage.removeItem(MY_LAST_RESUME_HASH_KEY));
+    setAnalysis(getLastAnalysis());
   }, []);
 
   const handleResumeUpload = async (e) => {
@@ -58,18 +55,18 @@ export default function CandidateOverviewSummary({ darkMode }) {
     setDuplicateNotice("");
 
     try {
-      // Analysis, scoring, and storage all happen on the ATS backend now.
       const result = await analyzeResume(file);
+      const existing = findAnalysisByHash(result.hash);
 
-      if (result.isDuplicate) {
-        const when = new Date(result.analyzedAt).toLocaleDateString(undefined, {
+      if (existing) {
+        const when = new Date(existing.analyzedAt).toLocaleDateString(undefined, {
           month: "short",
           day: "numeric",
         });
         setDuplicateNotice(`You've already uploaded this exact resume (analyzed ${when}) — refreshing its results.`);
       }
 
-      localStorage.setItem(MY_LAST_RESUME_HASH_KEY, result.hash);
+      saveAnalysis(result);
       setAnalysis(result);
     } catch (err) {
       setErrorMsg(err.message || "Couldn't analyze this resume. Please try a different file.");
