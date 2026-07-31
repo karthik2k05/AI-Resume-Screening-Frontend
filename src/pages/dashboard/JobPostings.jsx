@@ -8,6 +8,7 @@ import {
   createJobPosting,
   updateJobStatus,
   updateJobPosting,
+  deleteJobPosting,
 } from "../../services/jobPostingService";
 
 export default function JobPostings() {
@@ -145,6 +146,27 @@ setNewJobDescription("");
 
   }
 };
+    const handleDeleteJob = async (id) => {
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this job?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+    await deleteJobPosting(id);
+
+    await fetchJobs();
+
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      error.response?.data?.message ||
+      "Unable to delete job."
+    );
+  }
+};
   const handleEditJob = (job) => {
   setEditingJob(job);
 
@@ -275,6 +297,16 @@ setNewJobDescription("");
                 >
                   {p.status === "Open" ? "Close Posting" : "Reopen"}
                 </button>
+                <button
+  onClick={() => handleDeleteJob(p.id)}
+  className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
+    darkMode
+      ? "border-red-700 text-red-400 hover:bg-red-900/20"
+      : "border-red-300 text-red-600 hover:bg-red-100"
+  }`}
+>
+  Delete
+</button>
               </div>
             </div>
             ))

@@ -25,3 +25,6 @@ export const updateJobStatus = (id) =>
 
 export const updateJobPosting = (id, data) =>
   API.put(`/${id}`, data);
+
+export const deleteJobPosting = (id) =>
+  API.delete(`/${id}`);
