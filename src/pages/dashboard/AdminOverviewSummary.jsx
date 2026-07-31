@@ -15,7 +15,13 @@ import { Users, Briefcase, CalendarClock, Timer, ArrowRight } from "lucide-react
 import StatCard from "../../components/dashboard/StatCard";
 import { useEffect, useState } from "react";
 import axios from "axios";
-useEffect(() => {
+
+
+export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
+  const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
+  const openPostings = INITIAL_POSTINGS.filter((p) => p.status === "Open").length;
+  const [overview, setOverview] = useState(null);
+  useEffect(() => {
   const fetchOverview = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -38,11 +44,6 @@ useEffect(() => {
 
   fetchOverview();
 }, []);
-
-export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
-  const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
-  const openPostings = INITIAL_POSTINGS.filter((p) => p.status === "Open").length;
-  const [overview, setOverview] = useState(null);
 
   return (
     <div className="space-y-6 sm:space-y-8">
