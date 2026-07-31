@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import {
   getJobPostings,
   createJobPosting,
+  updateJobStatus,
+  updateJobPosting,
 } from "../../services/jobPostingService";
 
 export default function JobPostings() {
@@ -14,7 +16,7 @@ export default function JobPostings() {
   const [newJobDescription, setNewJobDescription] = useState("");  
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  
+  const [editingJob, setEditingJob] = useState(null);
   const [newJobTitle, setNewJobTitle] = useState("");
   const [newJobDept, setNewJobDept] = useState("");
   const [pagination, setPagination] = useState({
@@ -102,14 +104,67 @@ const addJobPosting = async () => {
     setNewJobDescription("");
     setShowNewJob(false);
 
+setEditingJob(null);
+
+setNewJobTitle("");
+setNewJobDept("");
+setNewJobDescription("");
+
   } catch (error) {
     console.error(error);
   }
 };
+  const editJobPosting = async () => {
+  const { requiredSkills } =
+    extractJDKeywords(newJobDescription);
 
-  const toggleJobStatus = (id) => {
-    setPostings((prev) => prev.map((p) => (p.id === id ? { ...p, status: p.status === "Open" ? "Closed" : "Open" } : p)));
-  };
+  try {
+
+    await updateJobPosting(editingJob.id, {
+      title: newJobTitle.trim(),
+      department: newJobDept.trim(),
+      company: "ResumeIQ",
+      location: "Remote",
+      description: newJobDescription.trim(),
+      keySkills: requiredSkills,
+    });
+
+    await fetchJobs();
+
+    setEditingJob(null);
+
+    setNewJobTitle("");
+    setNewJobDept("");
+    setNewJobDescription("");
+
+    setShowNewJob(false);
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+};
+  const handleEditJob = (job) => {
+  setEditingJob(job);
+
+  setNewJobTitle(job.title);
+  setNewJobDept(job.dept);
+  setNewJobDescription(job.description);
+
+  setShowNewJob(true);
+};
+
+  const toggleJobStatus = async (id) => {
+  try {
+    await updateJobStatus(id);
+
+    await fetchJobs();
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   return (
     <div className="space-y-6">
@@ -132,7 +187,9 @@ const addJobPosting = async () => {
       {showNewJob && (
         <div className={`rounded-2xl border p-5 sm:p-6 ${cardBg}`}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Create Job Posting</h3>
+            <h3 className="font-semibold">
+  {editingJob ? "Edit Job Posting" : "Create Job Posting"}
+</h3>
             <button onClick={() => setShowNewJob(false)} className={`p-1.5 rounded-lg ${darkMode ? "hover:bg-slate-800" : "hover:bg-slate-100"}`}>
               <X size={16} />
             </button>
@@ -166,10 +223,13 @@ const addJobPosting = async () => {
               }`}
             />
           </div>
-          <button onClick={addJobPosting} className="mt-4 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors">
-            <Check size={16} />
-            Publish Posting
-          </button>
+          <button
+  onClick={editingJob ? editJobPosting : addJobPosting}
+  className="mt-4 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors"
+>
+  <Check size={16} />
+  {editingJob ? "Update Job" : "Publish Posting"}
+</button>
         </div>
       )}
 
@@ -197,6 +257,16 @@ const addJobPosting = async () => {
                 >
                   {p.status}
                 </span>
+                <button
+  onClick={() => handleEditJob(p)}
+  className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
+    darkMode
+      ? "border-slate-700 hover:bg-slate-800"
+      : "border-slate-300 hover:bg-slate-100"
+  }`}
+>
+  Edit
+</button>
                 <button
                   onClick={() => toggleJobStatus(p.id)}
                   className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${

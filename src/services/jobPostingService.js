@@ -19,3 +19,9 @@ export const getJobPostings = (page, limit, search = "") =>
 
 export const createJobPosting = (data) =>
   API.post("/", data);
+
+export const updateJobStatus = (id) =>
+  API.patch(`/${id}/status`);
+
+export const updateJobPosting = (id, data) =>
+  API.put(`/${id}`, data);
