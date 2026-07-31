@@ -13,11 +13,36 @@ import {
 } from "recharts";
 import { Users, Briefcase, CalendarClock, Timer, ArrowRight } from "lucide-react";
 import StatCard from "../../components/dashboard/StatCard";
-import { APPLICANT_TREND, SOURCE_BREAKDOWN, INITIAL_POSTINGS } from "../../data/mockDashboardData";
+import { useEffect, useState } from "react";
+import axios from "axios";
+useEffect(() => {
+  const fetchOverview = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_BASE_URL}/api/admin/overview`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setOverview(response.data);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  fetchOverview();
+}, []);
 
 export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
   const openPostings = INITIAL_POSTINGS.filter((p) => p.status === "Open").length;
+  const [overview, setOverview] = useState(null);
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -30,8 +55,8 @@ export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
 
       {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <StatCard darkMode={darkMode} icon={Users} tint="bg-blue-600" label="Total Applicants" value="1,284" delta="12.4%" deltaLabel="vs. last month" positive />
-        <StatCard darkMode={darkMode} icon={Briefcase} tint="bg-emerald-600" label="Active Job Postings" value={openPostings} delta="+3" deltaLabel="vs. last month" positive />
+        <StatCard darkMode={darkMode} icon={Users} tint="bg-blue-600" label="Total Applicants" value={overview?.statistics.totalApplicants ?? 0} delta="12.4%" deltaLabel="vs. last month" positive />
+        <StatCard darkMode={darkMode} icon={Briefcase} tint="bg-emerald-600" label="Active Job Postings" value={overview?.statistics.activeJobPostings ?? 0} delta="+3" deltaLabel="vs. last month" positive />
         <StatCard darkMode={darkMode} icon={CalendarClock} tint="bg-indigo-600" label="Interviews This Week" value="42" delta="6.1%" deltaLabel="vs. last week" positive={false} />
         <StatCard darkMode={darkMode} icon={Timer} tint="bg-amber-500" label="Avg. Time to Hire" value="16 days" delta="2 days" deltaLabel="faster than last month" positive />
       </div>
@@ -45,7 +70,7 @@ export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
           </p>
           <div className="h-64 mt-4 -ml-2">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={APPLICANT_TREND}>
+              <AreaChart data={overview?.applicantTrend || []}>
                 <defs>
                   <linearGradient id="applicantFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#2563eb" stopOpacity={0.35} />
