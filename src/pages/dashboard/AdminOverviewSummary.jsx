@@ -19,7 +19,7 @@ import axios from "axios";
 
 export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
-  const openPostings = INITIAL_POSTINGS.filter((p) => p.status === "Open").length;
+  const openPostings = overview?.statistics?.activeJobPostings ?? 0;
   const [overview, setOverview] = useState(null);
   useEffect(() => {
   const fetchOverview = async () => {
@@ -27,7 +27,7 @@ export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
       const token = localStorage.getItem("token");
 
       const response = await axios.get(
-        `${import.meta.env.VITE_API_BASE_URL}/api/admin/overview`,
+        `${import.meta.env.VITE_API_URL}/api/admin/overview`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
