@@ -2,6 +2,11 @@ import { useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Plus, X, Check } from "lucide-react";
 import { extractJDKeywords } from "../../lib/jdMatcher";
+import { useEffect } from "react";
+import {
+  getJobPostings,
+  createJobPosting,
+} from "../../services/jobPostingService";
 
 export default function JobPostings() {
   const { darkMode, searchQuery,postings, setPostings } = useOutletContext();
@@ -12,45 +17,94 @@ export default function JobPostings() {
   
   const [newJobTitle, setNewJobTitle] = useState("");
   const [newJobDept, setNewJobDept] = useState("");
+  const [pagination, setPagination] = useState({
+  currentPage: 1,
+  totalPages: 1,
+  totalRecords: 0,
+  limit: 10,
+});
+  const fetchJobs = async () => {
+
+  try {
+
+    const response = await getJobPostings(
+      page,
+      limit,
+      searchQuery
+    );
+
+    const jobs = response.data.jobs.map((job) => ({
+      id: job.id,
+      title: job.title,
+      dept: job.department,
+      applicants: job.applicants_count,
+      status:
+        job.status === "open"
+          ? "Open"
+          : "Closed",
+      description: job.description,
+      keySkills: job.required_skills,
+    }));
+
+    setPostings(jobs);
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+  setPostings(jobs);
+setPagination(response.data.pagination);
+};
+    useEffect(() => {
+
+  fetchJobs();
+
+}, [page, limit, searchQuery]);
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
 
-  const filteredPostings = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return postings;
-    return postings.filter((p) => p.title.toLowerCase().includes(q) || p.dept.toLowerCase().includes(q));
-  }, [postings, searchQuery]);
+const addJobPosting = async () => {
+  if (!newJobTitle.trim() || !newJobDept.trim()) return;
 
-  const totalPages = Math.ceil(filteredPostings.length / limit);
+  const { requiredSkills } = extractJDKeywords(newJobDescription);
 
-const start = (page - 1) * limit;
+  try {
+    const response = await createJobPosting({
+      title: newJobTitle.trim(),
+      department: newJobDept.trim(),
+      description: newJobDescription.trim(),
+      company: "ResumeIQ",
+      location: "Remote",
+      keySkills: requiredSkills,
+    });
 
-const end = start + limit;
+    const job = response.data.job;
 
-const paginatedPostings = filteredPostings.slice(start, end);
-
-const addJobPosting = () => {
-    if (!newJobTitle.trim() || !newJobDept.trim()) return;
-    // Auto-derive key skills from the pasted description so this
-    // posting is immediately usable for JD-based resume screening,
-    // even without manually tagging skills.
-    const { requiredSkills } = extractJDKeywords(newJobDescription);
     setPostings((prev) => [
       {
-        id: Date.now(),
-        title: newJobTitle.trim(),
-        dept: newJobDept.trim(),
-        applicants: 0,
-        status: "Open",
-        description: newJobDescription.trim(),
-        keySkills: requiredSkills,
+        id: job.id,
+        title: job.title,
+        dept: job.department,
+        applicants: job.applicants_count,
+        status:
+          job.status === "open"
+            ? "Open"
+            : "Closed",
+        description: job.description,
+        keySkills: job.required_skills,
       },
       ...prev,
     ]);
+
     setNewJobTitle("");
     setNewJobDept("");
     setNewJobDescription("");
     setShowNewJob(false);
-  };
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const toggleJobStatus = (id) => {
     setPostings((prev) => prev.map((p) => (p.id === id ? { ...p, status: p.status === "Open" ? "Closed" : "Open" } : p)));
@@ -125,7 +179,7 @@ const addJobPosting = () => {
               No job postings match "{searchQuery}"
             </p>
           ) : (
-            paginatedPostings.map((p) => (
+            postings.map((p) => (
             <div key={p.id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 sm:px-6 py-4 border-t first:border-t-0 ${darkMode ? "border-slate-800" : "border-slate-100"}`}>
               <div>
                 <p className="font-medium">{p.title}</p>
@@ -172,15 +226,18 @@ const addJobPosting = () => {
   >
     Showing{" "}
     <span className="font-semibold">
-      {filteredPostings.length === 0 ? 0 : start + 1}
+      {(pagination.currentPage - 1) * pagination.limit + 1}
     </span>
     –
     <span className="font-semibold">
-      {Math.min(end, filteredPostings.length)}
+      {Math.min(
+    pagination.currentPage * pagination.limit,
+    pagination.totalRecords
+)}
     </span>{" "}
     of{" "}
     <span className="font-semibold">
-      {filteredPostings.length}
+      {pagination.totalRecords}
     </span>{" "}
     jobs
   </p>
@@ -216,7 +273,7 @@ const addJobPosting = () => {
 
     <button
       onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-      disabled={page === 1}
+      disabled={pagination.currentPage === 1}
       className={`px-4 py-2 rounded-lg border text-sm ${
         darkMode
           ? "border-slate-700 hover:bg-blue-500 disabled:opacity-40"
@@ -227,7 +284,7 @@ const addJobPosting = () => {
     </button>
 
     <div className="flex items-center gap-2">
-      {Array.from({ length: totalPages }, (_, index) => (
+      {Array.from({ length: pagination.totalPages }, (_, index) => (
         <button
           key={index + 1}
           onClick={() => setPage(index + 1)}
@@ -248,7 +305,7 @@ const addJobPosting = () => {
       onClick={() =>
         setPage((prev) => Math.min(prev + 1, totalPages))
       }
-      disabled={page === totalPages}
+      disabled={pagination.currentPage === 1}
       className={`px-4 py-2 rounded-lg border text-sm ${
         darkMode
           ? "border-slate-700 hover:bg-blue-500 disabled:opacity-40"
