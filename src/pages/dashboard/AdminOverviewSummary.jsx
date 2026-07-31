@@ -87,7 +87,7 @@ export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
             </ResponsiveContainer>
           </div>
         </div>
-
+      {/*
         <div className={`rounded-2xl border p-5 sm:p-6 ${cardBg}`}>
           <h3 className="font-semibold">Applicant Sources</h3>
           <p className={`text-xs mt-1 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
@@ -106,6 +106,7 @@ export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
             </ResponsiveContainer>
           </div>
         </div>
+        */}
       </div>
 
       {/* Quick links to the full pages instead of repeating their tables here */}
