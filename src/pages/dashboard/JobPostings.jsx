@@ -174,7 +174,7 @@ const addJobPosting = async () => {
 
       <div className={`rounded-2xl border ${cardBg} overflow-hidden`}>
         <div className="divide-y">
-          {filteredPostings.length === 0 ? (
+          {postings.length === 0 ? (
             <p className={`px-5 sm:px-6 py-8 text-center text-sm ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
               No job postings match "{searchQuery}"
             </p>
