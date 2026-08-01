@@ -51,7 +51,7 @@ const fetchProfile = async () => {
     const token = localStorage.getItem("token");
 
     const response = await axios.get(
-      `${import.meta.env.VITE_API_BASE_URL}/api/settings/profile`,
+      `${import.meta.env.VITE_API_URL}/api/settings/profile`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
