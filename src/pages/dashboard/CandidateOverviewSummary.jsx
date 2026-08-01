@@ -18,13 +18,11 @@ import {
   ArrowRight,
   Loader2,
   AlertTriangle,
-  Info,
   CheckCircle2,
   XCircle,
   FileText,
 } from "lucide-react";
-import { analyzeResume } from "../../lib/resumeParser";
-import { findAnalysisByHash, saveAnalysis, getLastAnalysis } from "../../lib/resumeStorage";
+import axios from "axios";
 
 function scoreLabel(score) {
   if (score >= 85) return "Strong ATS match — this resume should pass most automated screens.";
@@ -40,11 +38,43 @@ export default function CandidateOverviewSummary({ darkMode }) {
   const [analysis, setAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [duplicateNotice, setDuplicateNotice] = useState("");
+    
+  const fetchLatestResume = async () => {
 
-  useEffect(() => {
-    setAnalysis(getLastAnalysis());
-  }, []);
+    try{
+
+        const token = localStorage.getItem("token");
+
+        const response = await axios.get(
+
+            `${import.meta.env.VITE_API_URL}/api/candidate/resume`,
+
+            {
+                headers:{
+                    Authorization:`Bearer ${token}`
+                }
+            }
+
+        );
+
+        setAnalysis(response.data.resume);
+
+    }
+
+    catch (err) {
+    console.error(err);
+    setErrorMsg(
+        err.response?.data?.message ||
+        "Failed to load your resume."
+    );
+}
+
+}
+
+useEffect(() => {
+    fetchLatestResume();
+}, []);
+
 
   const handleResumeUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -52,25 +82,44 @@ export default function CandidateOverviewSummary({ darkMode }) {
 
     setAnalyzing(true);
     setErrorMsg("");
-    setDuplicateNotice("");
 
     try {
-      const result = await analyzeResume(file);
-      const existing = findAnalysisByHash(result.hash);
+      const formData = new FormData();
 
-      if (existing) {
-        const when = new Date(existing.analyzedAt).toLocaleDateString(undefined, {
-          month: "short",
-          day: "numeric",
-        });
-        setDuplicateNotice(`You've already uploaded this exact resume (analyzed ${when}) — refreshing its results.`);
-      }
+formData.append("resume", file);
 
-      saveAnalysis(result);
-      setAnalysis(result);
-    } catch (err) {
-      setErrorMsg(err.message || "Couldn't analyze this resume. Please try a different file.");
-    } finally {
+const token = localStorage.getItem("token");
+
+const response = await axios.post(
+
+    `${import.meta.env.VITE_API_URL}/api/candidate/upload-resume`,
+
+    formData,
+
+    {
+
+        headers:{
+
+            Authorization:`Bearer ${token}`
+
+        }
+
+    }
+
+);
+
+setAnalysis(response.data.resume);
+     
+    }
+     catch (err) {
+  console.error(err);
+
+  setErrorMsg(
+    err.response?.data?.message ||
+    "Couldn't analyze this resume. Please try again."
+  );
+}
+    finally {
       setAnalyzing(false);
       // reset so selecting the same file again still fires onChange
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -81,7 +130,7 @@ export default function CandidateOverviewSummary({ darkMode }) {
     <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Welcome back, Alex</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Welcome back, Candidate</h1>
           <p className={`mt-1 text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
             Here's how your job search is progressing.
           </p>
@@ -121,16 +170,8 @@ export default function CandidateOverviewSummary({ darkMode }) {
         </div>
       )}
 
-      {duplicateNotice && (
-        <div
-          className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
-            darkMode ? "bg-blue-950/40 border-blue-900 text-blue-300" : "bg-blue-50 border-blue-200 text-blue-700"
-          }`}
-        >
-          <Info size={18} className="shrink-0 mt-0.5" />
-          <p>{duplicateNotice}</p>
-        </div>
-      )}
+      
+
 
       <div className="grid lg:grid-cols-3 gap-5 sm:gap-6">
         <div className={`rounded-2xl border p-5 sm:p-6 flex flex-col items-center text-center ${cardBg}`}>
@@ -234,7 +275,7 @@ export default function CandidateOverviewSummary({ darkMode }) {
             </div>
             <p className={`text-xs mt-1 mb-4 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
               <FileText size={12} className="inline -mt-0.5 mr-1" />
-              {analysis.wordCount} words analyzed
+              {analysis.formatting.wordCount} words analyzed
             </p>
             <ul className="space-y-2.5">
               {analysis.formatting.checks.map((check) => (
