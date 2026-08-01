@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Check, Eye, EyeOff } from "lucide-react";
+import axios from "axios";
 
 const ROLE_LABELS = { admin: "Admin", hr: "HR", candidate: "Candidate" };
 
