@@ -37,10 +37,35 @@ export default function Settings() {
   const { darkMode, role } = useOutletContext();
   const roleLabel = ROLE_LABELS[role] || "Candidate";
 
-  const [name, setName] = useState(`${roleLabel} User`);
-  const [email, setEmail] = useState(`${role}@example.com`);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+  fetchProfile();
+}, []);
+
+const fetchProfile = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_BASE_URL}/api/settings/profile`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setName(response.data.profile.name);
+    setEmail(response.data.profile.email);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const [notifications, setNotifications] = useState({
     email: true,
@@ -54,12 +79,34 @@ export default function Settings() {
     darkMode ? "bg-slate-800 border-slate-700 placeholder-slate-500" : "bg-slate-50 border-slate-300 placeholder-slate-400"
   }`;
 
-  function handleSave() {
-    // TODO: replace with a real API call once the backend is connected,
-    // e.g. await updateProfile({ name, email, notifications })
+  const handleSave = async () => {
+  try {
+
+    const token = localStorage.getItem("token");
+
+    await axios.put(
+      `${import.meta.env.VITE_API_URL}/api/settings/profile`,
+      {
+        name,
+        email,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+
+    setTimeout(() => {
+      setSaved(false);
+    }, 2000);
+
+  } catch (error) {
+    console.error(error);
   }
+};
 
   return (
     <div className="space-y-6 max-w-2xl">
