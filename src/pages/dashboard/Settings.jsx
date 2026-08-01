@@ -41,7 +41,10 @@ export default function Settings() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [password, setPassword] = useState("");
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
   fetchProfile();
@@ -80,11 +83,12 @@ const fetchProfile = async () => {
     darkMode ? "bg-slate-800 border-slate-700 placeholder-slate-500" : "bg-slate-50 border-slate-300 placeholder-slate-400"
   }`;
 
-  const handleSave = async () => {
+ const handleSave = async () => {
   try {
 
     const token = localStorage.getItem("token");
 
+    // Update Profile
     await axios.put(
       `${import.meta.env.VITE_API_URL}/api/settings/profile`,
       {
@@ -98,6 +102,32 @@ const fetchProfile = async () => {
       }
     );
 
+    // Change Password (only if user entered one)
+    if (newPassword !== "") {
+
+      if (newPassword !== confirmPassword) {
+        alert("Passwords do not match");
+        return;
+      }
+
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/settings/change-password`,
+        {
+          currentPassword,
+          newPassword,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+
     setSaved(true);
 
     setTimeout(() => {
@@ -105,7 +135,13 @@ const fetchProfile = async () => {
     }, 2000);
 
   } catch (error) {
+
     console.error(error);
+
+    alert(
+      error.response?.data?.message ||
+      "Something went wrong"
+    );
   }
 };
 
@@ -141,25 +177,49 @@ const fetchProfile = async () => {
         </div>
       </SectionCard>
 
-      <SectionCard title="Password" desc="Change your account password." darkMode={darkMode}>
-        <div className="relative">
-          <input
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="New password"
-            className={`${inputClasses} pr-10`}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
-        </div>
-      </SectionCard>
+<SectionCard
+  title="Password"
+  desc="Change your account password."
+  darkMode={darkMode}
+>
+
+  <div className="space-y-4">
+
+    <input
+      type={showPassword ? "text" : "password"}
+      placeholder="Current Password"
+      value={currentPassword}
+      onChange={(e) => setCurrentPassword(e.target.value)}
+      className={inputClasses}
+    />
+
+    <input
+      type={showPassword ? "text" : "password"}
+      placeholder="New Password"
+      value={newPassword}
+      onChange={(e) => setNewPassword(e.target.value)}
+      className={inputClasses}
+    />
+
+    <input
+      type={showPassword ? "text" : "password"}
+      placeholder="Confirm New Password"
+      value={confirmPassword}
+      onChange={(e) => setConfirmPassword(e.target.value)}
+      className={inputClasses}
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="text-blue-600 text-sm"
+    >
+      {showPassword ? "Hide Passwords" : "Show Passwords"}
+    </button>
+
+  </div>
+
+</SectionCard>
 
       <SectionCard title="Notifications" desc="What you get emailed about." darkMode={darkMode}>
         <div className="flex items-center justify-between">
