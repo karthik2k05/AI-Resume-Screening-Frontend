@@ -12,7 +12,6 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { analyzeResume } from "../../lib/resumeParser";
 import { scoreResumeAgainstJD } from "../../lib/jdMatcher";
 import axios from "axios";
 
@@ -121,54 +120,66 @@ export default function ResumeScreening() {
   const tableRows = topN === "All" ? ranked : ranked.slice(0, topN);
 
   const handleFiles = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
+  const files = Array.from(e.target.files || []);
 
-    setProcessing(true);
-    setFileErrors([]);
-    setDuplicateNames([]);
-    setProgress({ current: 0, total: files.length });
+  if (files.length === 0) return;
 
-    const errors = [];
-    const duplicates = [];
-    let completed = 0;
+  setProcessing(true);
+  setProgress({
+    current: 0,
+    total: files.length,
+  });
 
-    // All selected files are analyzed concurrently (not one at a time) —
-    // progress reflects however many have finished so far, regardless
-    // of which order they complete in.
-    await Promise.allSettled(
-      files.map(async (file) => {
-        try {
-          const analysis = await analyzeResume(file);
-          const alreadySeen = !!findHrBatchByHash(analysis.hash);
-          if (alreadySeen) duplicates.push(analysis.fileName);
+  try {
 
-          saveHrBatchEntry({
-            hash: analysis.hash,
-            fileName: analysis.fileName,
-            candidateName: analysis.candidateName,
-            analyzedAt: analysis.analyzedAt,
-            atsScore: analysis.score.overall,
-            text: analysis.text,
-            matchedSkills: analysis.matchedSkills,
-            missingSkills: analysis.missingSkills,
-            formatting: analysis.formatting,
-          });
-        } catch (err) {
-          errors.push({ fileName: file.name, message: err.message || "Couldn't analyze this file." });
-        } finally {
-          completed += 1;
-          setProgress({ current: completed, total: files.length });
-        }
-      })
+    const token = localStorage.getItem("token");
+
+    const formData = new FormData();
+
+    files.forEach((file) => {
+      formData.append("resumes", file);
+    });
+
+    await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/hr/upload-resumes`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      }
     );
 
-    setBatch(getHrBatch());
-    setFileErrors(errors);
-    setDuplicateNames(duplicates);
+    await fetchResumes();
+
+    setDuplicateNames([]);
+    setFileErrors([]);
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      error.response?.data?.message ||
+      "Failed to upload resumes."
+    );
+
+  } finally {
+
     setProcessing(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
+
+    setProgress({
+      current: files.length,
+      total: files.length,
+    });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+
+  }
+};
 
   const addToPipeline = (entry) => {
     setCandidates((prev) => [
