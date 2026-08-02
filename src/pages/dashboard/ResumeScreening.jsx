@@ -196,16 +196,29 @@ export default function ResumeScreening() {
     setAddedHashes((prev) => new Set(prev).add(entry.hash));
   };
 
-  const removeEntry = (hash) => {
-    setBatch(removeHrBatchEntry(hash));
-  };
+  const removeEntry = async (resumeId) => {
+  try {
+    const token = localStorage.getItem("token");
 
-  const handleClearAll = () => {
-    if (batch.length === 0) return;
-    if (!confirm(`Remove all ${batch.length} screened resumes? This can't be undone.`)) return;
-    clearHrBatch();
-    setBatch([]);
-  };
+    await axios.delete(
+      `${import.meta.env.VITE_API_URL}/api/hr/resumes/${resumeId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    await fetchResumes();
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const handleClearAll = () => {
+  alert("Backend Clear All API not connected yet.");
+};
 
   const clearFilter = () => {
     setSelectedPostingId("");
@@ -468,7 +481,7 @@ export default function ResumeScreening() {
                               {added ? "✓ Added" : "Advance"}
                             </button>
                             <button
-                              onClick={() => removeEntry(entry.hash)}
+                              onClick={() => removeEntry(entry.resume_id)}
                               className="text-xs font-semibold text-rose-600 hover:text-rose-700"
                             >
                               Remove
