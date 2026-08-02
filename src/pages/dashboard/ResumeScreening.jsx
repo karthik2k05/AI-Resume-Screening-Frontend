@@ -14,13 +14,7 @@ import {
 } from "lucide-react";
 import { analyzeResume } from "../../lib/resumeParser";
 import { scoreResumeAgainstJD } from "../../lib/jdMatcher";
-import {
-  getHrBatch,
-  findHrBatchByHash,
-  saveHrBatchEntry,
-  removeHrBatchEntry,
-  clearHrBatch,
-} from "../../lib/resumeStorage";
+import axios from "axios";
 
 const TOP_N_OPTIONS = [5, 10, 20, "All"];
 const RANK_STYLES = [
@@ -45,8 +39,52 @@ export default function ResumeScreening() {
   const [addedHashes, setAddedHashes] = useState(new Set());
   const [expandedHash, setExpandedHash] = useState(null);
 
+  const fetchResumes = async () => {
+  try {
+
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/hr/resumes`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const formatted = response.data.resumes.map((resume) => ({
+      hash: resume.resume_id,
+      resume_id: resume.resume_id,
+      fileName: resume.file_name,
+      candidateName: resume.candidate_name,
+      analyzedAt: resume.uploaded_at,
+      atsScore: resume.match_score,
+      displayScore: resume.match_score,
+      text: resume.resume_text,
+      matchedSkills: resume.detected_skills || [],
+      missingSkills: resume.missing_skills || [],
+      formatting: {
+        passedCount: Math.round((resume.resume_health || 0) / 20),
+        totalChecks: 5,
+        warnings: [],
+        wordCount: resume.resume_text
+          ? resume.resume_text.split(/\s+/).length
+          : 0,
+      },
+    }));
+
+    setBatch(formatted);
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+};
+
   useEffect(() => {
-    setBatch(getHrBatch());
+    fetchResumes();
   }, []);
 
   const selectedPosting = useMemo(
