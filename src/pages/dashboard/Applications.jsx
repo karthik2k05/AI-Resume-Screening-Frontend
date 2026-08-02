@@ -1,20 +1,49 @@
 import { useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Briefcase } from "lucide-react";
-import { APPLICATIONS, APPLICATION_STATUS_STYLES } from "../../data/mockDashboardData";
+import { APPLICATION_STATUS_STYLES } from "../../data/mockDashboardData";
+import axios from "axios";
+import { useEffect } from "react";
 
 export default function Applications() {
   const { darkMode, searchQuery } = useOutletContext();
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
   const [page, setPage] = useState(1);
 const [limit, setLimit] = useState(10);
+const [applications, setApplications] = useState([]);
   const filteredApplications = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return APPLICATIONS;
-    return APPLICATIONS.filter(
-      (a) => a.role.toLowerCase().includes(q) || a.company.toLowerCase().includes(q) || a.status.toLowerCase().includes(q)
+    if (!q) return applications;
+    return applications.filter(
+  (a) =>
+    a.job_title.toLowerCase().includes(q) ||
+    a.company_name.toLowerCase().includes(q) ||
+    a.status.toLowerCase().includes(q)
+);
+  }, [applications, searchQuery]);
+  useEffect(() => {
+  fetchApplications();
+}, []);
+
+const fetchApplications = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/candidate/applications`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
-  }, [searchQuery]);
+
+    setApplications(response.data.applications);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
   const totalRecords = filteredApplications.length;
   const totalPages = Math.ceil(totalRecords / limit);
 
@@ -41,19 +70,24 @@ const paginatedApplications = filteredApplications.slice(start, end);
             </p>
           ) : (
             paginatedApplications.map((a) => (
-              <div key={a.id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-5 sm:px-6 py-4 border-t first:border-t-0 ${darkMode ? "border-slate-800" : "border-slate-100"}`}>
+              <div key={a.application_id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-5 sm:px-6 py-4 border-t first:border-t-0 ${darkMode ? "border-slate-800" : "border-slate-100"}`}>
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${darkMode ? "bg-slate-800" : "bg-slate-100"}`}>
                     <Briefcase size={17} className="text-blue-600" />
                   </div>
                   <div>
-                    <p className="font-medium">{a.role}</p>
+                    <p className="font-medium">{a.job_title}</p>
                     <p className={`text-xs mt-0.5 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
-                      {a.company} · Applied {a.applied}
+                      {a.company_name} · Applied {new Date(a.applied_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
-                <span className={`self-start sm:self-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${APPLICATION_STATUS_STYLES[a.status]}`}>
+                <span
+className={`self-start sm:self-center px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+APPLICATION_STATUS_STYLES[a.status] ||
+"bg-gray-100 text-gray-700"
+}`}
+>
                   {a.status}
                 </span>
               </div>

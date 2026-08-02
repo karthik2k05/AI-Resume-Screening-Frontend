@@ -1,8 +1,7 @@
 import { useMemo, useState,useEffect } from "react";
 import { useOutletContext,Link } from "react-router-dom";
 import { MapPin, Check,FileSearch,CheckCircle2,XCircle } from "lucide-react";
-import { RECOMMENDED_JOBS } from "../../data/mockDashboardData";
-import { getLastAnalysis } from "../../lib/resumeStorage";
+import axios from "axios";
 import { scoreResumeAgainstJD } from "../../lib/jdMatcher";
 
 export default function JobMatches() {
@@ -12,10 +11,77 @@ export default function JobMatches() {
   const [limit, setLimit] = useState(10);
   const [resume, setResume] = useState(null);
   const [jdText, setJdText] = useState("");
+  const [jobs, setJobs] = useState([]);
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
     useEffect(() => {
-    setResume(getLastAnalysis());
-  }, []);
+    fetchResume();
+    fetchJobs();
+    fetchAppliedJobs();
+}, []);
+
+const fetchResume = async () => {
+  try {
+
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/candidate/resume`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setResume(response.data.resume);
+
+  } catch (error) {
+    console.error(error);
+    setResume(null);
+  }
+};
+
+const fetchJobs = async () => {
+    try {
+
+        const token = localStorage.getItem("token");
+
+        const response = await axios.get(
+            `${import.meta.env.VITE_API_URL}/api/candidate/jobs`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        setJobs(response.data.jobs);
+
+    } catch (error) {
+        console.error(error);
+    }
+};
+      const fetchAppliedJobs = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/candidate/applications`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const ids = response.data.applications.map((a) => a.job_id);
+
+    setAppliedJobs(ids);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const jdMatch = useMemo(() => {
     if (!resume || !jdText.trim()) return null;
@@ -25,18 +91,46 @@ export default function JobMatches() {
     );
   }, [resume, jdText]);
 
-  const applyToJob = (id) => setAppliedJobs((prev) => [...prev, id]);
+  const applyToJob = async (jobId) => {
+  try {
+
+    const token = localStorage.getItem("token");
+
+    await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/candidate/apply`,
+      {
+        job_id: jobId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setAppliedJobs((prev) => [...prev, jobId]);
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      error.response?.data?.message ||
+      "Unable to apply."
+    );
+  }
+};
 
   const filteredJobs = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) return RECOMMENDED_JOBS;
-    return RECOMMENDED_JOBS.filter(
-      (j) => j.role.toLowerCase().includes(q) || j.company.toLowerCase().includes(q) || j.location.toLowerCase().includes(q)
+    if (!q) return jobs;
+    return jobs.filter(
+      (j) => j.job_title.toLowerCase().includes(q) || j.company_name.toLowerCase().includes(q) || (j.description || "").toLowerCase().includes(q)
     );
   }, [searchQuery]);
   const totalRecords = filteredJobs.length;
 
-const totalPages = Math.ceil(totalRecords / limit);
+const totalPages = Math.max(1, Math.ceil(totalRecords / limit));
 
 const start = (page - 1) * limit;
 
@@ -134,23 +228,22 @@ const paginatedJobs = filteredJobs.slice(start, end);
             </p>
           ) : (
             paginatedJobs.map((j) => {
-              const applied = appliedJobs.includes(j.id);
+              const applied = appliedJobs.includes(j.job_id);
               return (
-                <div key={j.id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 sm:px-6 py-4 border-t first:border-t-0 ${darkMode ? "border-slate-800" : "border-slate-100"}`}>
+                <div key={j.job_id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 sm:px-6 py-4 border-t first:border-t-0 ${darkMode ? "border-slate-800" : "border-slate-100"}`}>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-medium">{j.role}</p>
-                      <span className="text-xs font-semibold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">{j.match}% match</span>
+                      <p className="font-medium">{j.job_title}</p>
+                      <span className="text-xs font-semibold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">ATS Match</span>
                     </div>
                     <p className={`text-xs mt-1 flex items-center gap-1 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
-                      {j.company}
+                      {j.company_name}
                       <span className="mx-1">·</span>
-                      <MapPin size={12} />
-                      {j.location}
+                      
                     </p>
                   </div>
                   <button
-                    onClick={() => applyToJob(j.id)}
+                    onClick={() => applyToJob(j.job_id)}
                     disabled={applied}
                     className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors shrink-0 ${
                       applied ? "bg-emerald-100 text-emerald-700 cursor-default" : "bg-blue-600 hover:bg-blue-700 text-white"
