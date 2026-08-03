@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect,useState } from "react";
 import {
   AreaChart,
   Area,
@@ -48,7 +48,16 @@ const HIRING_FUNNEL = [
 
 const STAGES = ["Screening", "Interview Scheduled", "Offer Sent", "Hired"];
 
-
+const [dashboard, setDashboard] = useState({
+  statistics: {
+    totalApplicants: 0,
+    activeJobPostings: 0,
+    interviewsThisWeek: 0,
+    averageATSScore: 0,
+  },
+  applicantTrend: [],
+  hiringFunnel: [],
+});
 
 
 
@@ -61,38 +70,29 @@ const STATUS_STYLES = {
 };
 
 useEffect(() => {
-  loadOverview();
+  fetchDashboard();
   fetchCandidates();
 }, []);
-
-const loadOverview = async () => {
+const fetchDashboard = async () => {
   try {
-
     const token = localStorage.getItem("token");
 
     const response = await axios.get(
-      `${import.meta.env.VITE_API_URL}/api/admin/hr-overview`,
+      `${import.meta.env.VITE_API_URL}/api/hr/dashboard`,
       {
-        headers:{
-          Authorization:`Bearer ${token}`
-        }
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
     );
 
-    const data = response.data;
+    setDashboard(response.data);
 
-    setOverview(data.statistics);
-    setTrend(data.applicantTrend);
-    setFunnel(data.hiringFunnel);
-    setCandidates(data.recentCandidates);
-    setPostings(data.jobPostings);
-
-  } catch(err){
-
+  } catch (err) {
     console.error(err);
-
   }
 };
+
 const fetchCandidates = async () => {
   try {
     const token = localStorage.getItem("token");
@@ -157,12 +157,12 @@ export default function AdminHrOverview({ darkMode, roleLabel }) {
   };
 
   const exportReport = () => {
-    const rows = [
-      ["Metric", "Value"],
-      ["Total Applicants", "1,284"],
-      ["Active Job Postings", String(postings.filter((p) => p.status === "Open").length)],
-      ["Interviews This Week", "42"],
-      ["Avg. Time to Hire", "16 days"],
+const rows = [
+  ["Metric", "Value"],
+  ["Total Applicants", dashboard.statistics.totalApplicants],
+  ["Active Job Postings", dashboard.statistics.activeJobPostings],
+  ["Interviews This Week", dashboard.statistics.interviewsThisWeek],
+  ["Average ATS Score", `${dashboard.statistics.averageATSScore}%`],
       [],
       ["Candidate", "Role", "AI Match Score", "Status"],
       ...candidates.map((c) => [c.candidate_name, c.job_title, `${c.match_score}%`, c.status]),
