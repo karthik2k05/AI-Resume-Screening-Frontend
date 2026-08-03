@@ -16,10 +16,6 @@ const [limit, setLimit] = useState(10);
   const start = (page - 1) * limit + 1;
 
   const end = Math.min(page * limit, totalRecords);
-
-
-useEffect(() => {
-
 const fetchCandidates = async () => {
   try {
     const token = localStorage.getItem("token");
@@ -43,15 +39,16 @@ const fetchCandidates = async () => {
 
     setCandidates(mapped);
 
+// Pagination
+setTotalRecords(mapped.length);
+setTotalPages(Math.ceil(mapped.length / limit));
+
   } catch (err) {
     console.error(err);
   }
 };
 
 useEffect(() => {
-  fetchCandidates();
-}, []);
-
   fetchCandidates();
 
 }, [page, limit]);
@@ -65,7 +62,6 @@ useEffect(() => {
   return candidates.filter(
     (c) =>
       (c.name || "").toLowerCase().includes(q) ||
-      (c.email || "").toLowerCase().includes(q) ||
       (c.role || "").toLowerCase().includes(q) ||
       (c.status || "").toLowerCase().includes(q)
   );
@@ -183,7 +179,7 @@ const rejectCandidate = async (applicationId) => {
                 </tr>
               ) : (
                 filteredCandidates.map((c) => (
-                <tr key={c.id} className={`border-t ${darkMode ? "border-slate-800" : "border-slate-100"}`}>
+                <tr key={c.application_id} className={`border-t ${darkMode ? "border-slate-800" : "border-slate-100"}`}>
                   <td className="px-5 sm:px-6 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center text-xs font-semibold shrink-0">
