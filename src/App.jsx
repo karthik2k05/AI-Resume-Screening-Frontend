@@ -45,15 +45,19 @@ function App() {
           path="/dashboard/:role"
           element={<DashboardLayout darkMode={darkMode} setDarkMode={setDarkMode} />}
         >
+
          <Route index element={<Overview />} />
           {/* admin / hr */}
 
-          <Route path="pages/dashboard/admin/*" element={<candidatesAdmin />}>
-            <Route path="candidates" element={<CandidatesAdmin />} />
-          </Route>
-          <Route path="pages/dashboard/hr/*" element={<CandidatesHR />} >
-            <Route path="candidates" element={<CandidatesHR />} />
-          </Route>
+            <Route
+    path="candidates"
+    element={
+      location.pathname.includes("/dashboard/hr")
+        ? <CandidatesHR />
+        : <CandidatesAdmin />
+    }
+  />
+      
 
           <Route path="jobs" element={<JobPostings />} />
           <Route path="screening" element={<ResumeScreening />} />
