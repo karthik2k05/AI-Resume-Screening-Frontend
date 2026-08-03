@@ -77,9 +77,6 @@ const end = Math.min(page * limit, totalRecords);
     URL.revokeObjectURL(url);
   };
 
-  const start = (page - 1) * limit + 1;
-  const end = Math.min(page * limit, totalRecords);
-
   return (
     <div className="space-y-6">
 
