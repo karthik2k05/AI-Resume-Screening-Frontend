@@ -38,6 +38,8 @@ export default function CandidateOverviewSummary({ darkMode }) {
   const [analysis, setAnalysis] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [jobCount, setJobCount] = useState(0);
+  const [applicationCount, setApplicationCount] = useState(0);
     
   const fetchLatestResume = async () => {
 
@@ -71,8 +73,50 @@ export default function CandidateOverviewSummary({ darkMode }) {
 
 }
 
+const fetchApplications = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/candidate/applications`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setApplicationCount(response.data.applications.length);
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const fetchJobMatches = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/candidate/jobs`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setJobCount(response.data.jobs.length);
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 useEffect(() => {
     fetchLatestResume();
+    fetchApplications();
+    fetchJobMatches();
 }, []);
 
 
@@ -297,14 +341,20 @@ setAnalysis(response.data.resume);
         <Link to="/dashboard/candidate/applications" className={`flex items-center justify-between rounded-2xl border p-5 transition-colors ${cardBg} hover:border-blue-500/50`}>
           <div>
             <p className="font-semibold">My Applications</p>
-            <p className={`text-xs mt-1 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>4 in progress</p>
+            <p className={`text-xs mt-1 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>{applicationCount} in progress</p>
           </div>
           <ArrowRight size={18} className="text-blue-600" />
         </Link>
         <Link to="/dashboard/candidate/matches" className={`flex items-center justify-between rounded-2xl border p-5 transition-colors ${cardBg} hover:border-blue-500/50`}>
           <div>
             <p className="font-semibold">Job Matches</p>
-            <p className={`text-xs mt-1 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>3 recommended for you</p>
+            <p
+  className={`text-xs mt-1 ${
+    darkMode ? "text-slate-500" : "text-slate-400"
+  }`}
+>
+  {jobCount} recommended for you
+</p>
           </div>
           <ArrowRight size={18} className="text-blue-600" />
         </Link>
