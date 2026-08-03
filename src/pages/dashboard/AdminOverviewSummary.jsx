@@ -77,22 +77,45 @@ useEffect(() => {
     label="Active Job Postings"
     value={overview?.statistics?.activeJobPostings ?? 0}
   />
+  
 
-  <StatCard
-    darkMode={darkMode}
-    icon={CalendarClock}
-    tint="bg-indigo-600"
-    label="Interviews This Week"
-    value={overview?.statistics?.interviewsThisWeek ?? 0}
-  />
+  {role === "admin" ? (
+  <>
+    <StatCard
+      darkMode={darkMode}
+      icon={CalendarClock}
+      tint="bg-indigo-600"
+      label="Total Applications"
+      value={overview?.statistics?.totalApplications ?? 0}
+    />
 
-  <StatCard
-    darkMode={darkMode}
-    icon={Timer}
-    tint="bg-amber-500"
-    label="Average ATS Score"
-    value={`${overview?.statistics?.averageATSScore ?? 0}%`}
-  />
+    <StatCard
+      darkMode={darkMode}
+      icon={Timer}
+      tint="bg-amber-500"
+      label="Total Job Postings"
+      value={overview?.statistics?.totalJobPostings ?? 0}
+    />
+  </>
+) : (
+  <>
+    <StatCard
+      darkMode={darkMode}
+      icon={CalendarClock}
+      tint="bg-indigo-600"
+      label="Interviews This Week"
+      value={overview?.statistics?.interviewsThisWeek ?? 0}
+    />
+
+    <StatCard
+      darkMode={darkMode}
+      icon={Timer}
+      tint="bg-amber-500"
+      label="Average ATS Score"
+      value={`${overview?.statistics?.averageATSScore ?? 0}%`}
+    />
+  </>
+)}
 
 </div>
 
