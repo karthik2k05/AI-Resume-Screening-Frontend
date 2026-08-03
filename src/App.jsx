@@ -48,10 +48,10 @@ function App() {
          <Route index element={<Overview />} />
           {/* admin / hr */}
 
-          <Route path="/dashboard/admin/*" element={<AdminLayout />}>
+          <Route path="pages/dashboard/admin/*" element={<candidatesAdmin />}>
             <Route path="candidates" element={<CandidatesAdmin />} />
           </Route>
-          <Route path="/dashboard/hr/*" element={<HRLayout />}>
+          <Route path="pages/dashboard/hr/*" element={<CandidatesHR />} >
             <Route path="candidates" element={<CandidatesHR />} />
           </Route>
 
