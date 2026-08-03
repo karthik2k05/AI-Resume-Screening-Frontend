@@ -47,8 +47,14 @@ function App() {
         >
          <Route index element={<Overview />} />
           {/* admin / hr */}
-          <Route path="candidates" element={<CandidatesAdmin />} />
-          <Route path="candidatesHR" element={<CandidatesHR />} />
+
+          <Route path="/dashboard/admin/*" element={<AdminLayout />}>
+            <Route path="candidates" element={<CandidatesAdmin />} />
+          </Route>
+          <Route path="/dashboard/hr/*" element={<HRLayout />}>
+            <Route path="candidates" element={<CandidatesHR />} />
+          </Route>
+
           <Route path="jobs" element={<JobPostings />} />
           <Route path="screening" element={<ResumeScreening />} />
           <Route path="analytics" element={<Analytics />} />
