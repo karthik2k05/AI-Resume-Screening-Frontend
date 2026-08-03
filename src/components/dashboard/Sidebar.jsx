@@ -28,9 +28,9 @@ function navFor(role) {
   if (role === "admin") {
   return [
     { label: "Overview", icon: LayoutDashboard, to: base, end: true },
-    { label: "Candidates", icon: Users, to: `${base}/candidates` },
     { label: "Job Postings", icon: Briefcase, to: `${base}/jobs` },
     { label: "Analytics", icon: ChartColumn, to: `${base}/analytics` },
+    { label: "Candidates", icon: Users, to: `${base}/candidatesAdmin` },
 
     // NEW
     { label: "Support Chats", icon: MessageSquare, to: `${base}/support` },
@@ -42,7 +42,7 @@ function navFor(role) {
 if (role === "hr") {
   return [
     { label: "Overview", icon: LayoutDashboard, to: base, end: true },
-    { label: "Candidates", icon: Users, to: `${base}/candidates` },
+    { label: "Candidates", icon: Users, to: `${base}/candidatesHR` },
     { label: "Resume Screening", icon: ScanLine, to: `${base}/screening` },
     { label: "Job Postings", icon: Briefcase, to: `${base}/jobs` },
     { label: "Analytics", icon: ChartColumn, to: `${base}/analytics` },

@@ -1,7 +1,7 @@
 import { useMemo, useState,useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Download } from "lucide-react";
-import AdminAPI from "../../api/adminApi";
+import axios from "axios";
 import { STAGES, STATUS_STYLES, initials } from "../../data/mockDashboardData";
 
 export default function Candidates() {
@@ -20,24 +20,37 @@ const [limit, setLimit] = useState(10);
 
 useEffect(() => {
 
-  const fetchCandidates = async () => {
+const fetchCandidates = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-    try {
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/hr/applications`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-      const res = await AdminAPI.getCandidates(page,limit);
+    const mapped = response.data.applications.map((app) => ({
+      application_id: app.application_id,
+      name: app.candidate_name,
+      role: app.title,
+      score: app.match_score,
+      status: app.status,
+    }));
 
-      setCandidates(res.data.data);
+    setCandidates(mapped);
 
-      setTotalPages(res.data.pagination.totalPages);
-      setTotalRecords(res.data.pagination.totalRecords);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
-    } catch (err) {
-
-      console.error(err);
-
-    }
-
-  };
+useEffect(() => {
+  fetchCandidates();
+}, []);
 
   fetchCandidates();
 
@@ -58,20 +71,60 @@ useEffect(() => {
   );
 }, [candidates, searchQuery]);
 
-  const advanceCandidate = (id) => {
-    setCandidates((prev) =>
-      prev.map((c) => {
-        if (c.user_id !== id) return c;
-        const idx = STAGES.indexOf(c.status);
-        const next = idx === -1 || idx === STAGES.length - 1 ? c.status : STAGES[idx + 1];
-        return { ...c, status: next };
-      })
-    );
-  };
+const advanceCandidate = async (applicationId, status) => {
+  try {
 
-  const rejectCandidate = (id) => {
-    setCandidates((prev) => prev.map((c) => (c.user_id === id ? { ...c, status: "Rejected" } : c)));
-  };
+    const token = localStorage.getItem("token");
+
+    let endpoint = "";
+
+    if (status === "Applied")
+      endpoint = "shortlist";
+
+    else if (status === "Shortlisted")
+      endpoint = "interview";
+
+    else
+      return;
+
+    await axios.put(
+      `${import.meta.env.VITE_API_URL}/api/hr/applications/${applicationId}/${endpoint}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    fetchCandidates();
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const rejectCandidate = async (applicationId) => {
+  try {
+
+    const token = localStorage.getItem("token");
+
+    await axios.put(
+      `${import.meta.env.VITE_API_URL}/api/hr/applications/${applicationId}/reject`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    fetchCandidates();
+
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   const exportReport = () => {
     const rows = [
@@ -154,11 +207,15 @@ useEffect(() => {
                     <div className="flex items-center justify-end gap-2">
                       {c.status !== "Hired" && c.status !== "Rejected" ? (
                         <>
-                          <button onClick={() => advanceCandidate(c.user_id)} className="text-xs font-semibold text-blue-600 hover:text-blue-700 whitespace-nowrap">
+                          <button onClick={() =>
+  advanceCandidate(c.application_id, c.status)
+} className="text-xs font-semibold text-blue-600 hover:text-blue-700 whitespace-nowrap">
                             Advance
                           </button>
                           <span className={darkMode ? "text-slate-700" : "text-slate-300"}>|</span>
-                          <button onClick={() => rejectCandidate(c.user_id)} className="text-xs font-semibold text-rose-600 hover:text-rose-700">
+                          <button onClick={() =>
+  rejectCandidate(c.application_id)
+} className="text-xs font-semibold text-rose-600 hover:text-rose-700">
                             Reject
                           </button>
                         </>
