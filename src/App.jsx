@@ -62,7 +62,7 @@ function App() {
              <Route
   path="analytics"
   element={
-    role === "hr"
+    location.pathname.includes("/dashboard/hr")
       ? <AnalyticsHR darkMode={darkMode}/>
       : <AnalyticsAdmin darkMode={darkMode}/>
   }
