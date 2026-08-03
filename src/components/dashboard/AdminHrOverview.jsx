@@ -24,14 +24,6 @@ import {
   Check,
 } from "lucide-react";
 import StatCard from "./StatCard";
-const APPLICANT_TREND = [
-  { month: "Feb", applicants: 145 },
-  { month: "Mar", applicants: 210 },
-  { month: "Apr", applicants: 189 },
-  { month: "May", applicants: 264 },
-  { month: "Jun", applicants: 298 },
-  { month: "Jul", applicants: 342 },
-];
 
 const SOURCE_BREAKDOWN = [
   { name: "LinkedIn", value: 38, color: "#2563eb" },
@@ -39,6 +31,12 @@ const SOURCE_BREAKDOWN = [
   { name: "Referrals", value: 22, color: "#22c55e" },
   { name: "Company Site", value: 14, color: "#f59e0b" },
 ];
+const [overview, setOverview] = useState(null);
+const [trend, setTrend] = useState([]);
+const [funnel, setFunnel] = useState([]);
+const [candidates, setCandidates] = useState([]);
+const [postings, setPostings] = useState([]);
+import axios from "axios";
 
 const HIRING_FUNNEL = [
   { stage: "Applied", count: 1284 },
@@ -50,24 +48,9 @@ const HIRING_FUNNEL = [
 
 const STAGES = ["Screening", "Interview Scheduled", "Offer Sent", "Hired"];
 
-const INITIAL_CANDIDATES = [
-  { id: 1, name: "Ananya Rao", role: "Senior Frontend Developer", applied: "2 days ago", score: 94, status: "Interview Scheduled" },
-  { id: 2, name: "Kevin Chao", role: "Backend Engineer (Node.js)", applied: "3 days ago", score: 88, status: "Screening" },
-  { id: 3, name: "Priya Nathan", role: "UX Designer", applied: "5 days ago", score: 76, status: "Screening" },
-  { id: 4, name: "Marcus Webb", role: "DevOps Engineer", applied: "1 week ago", score: 91, status: "Offer Sent" },
-  { id: 5, name: "Sara Malik", role: "Data Analyst", applied: "1 week ago", score: 68, status: "Rejected" },
-  { id: 6, name: "Daniel Osei", role: "Product Manager", applied: "4 days ago", score: 83, status: "Interview Scheduled" },
-  { id: 7, name: "Linh Tran", role: "QA Engineer", applied: "6 days ago", score: 79, status: "Screening" },
-  { id: 8, name: "Ahmed Farouk", role: "Full Stack Developer", applied: "2 weeks ago", score: 96, status: "Hired" },
-];
 
-const INITIAL_POSTINGS = [
-  { id: 1, title: "Senior Frontend Developer", dept: "Engineering", applicants: 142, status: "Open" },
-  { id: 2, title: "Backend Engineer (Node.js)", dept: "Engineering", applicants: 98, status: "Open" },
-  { id: 3, title: "UX Designer", dept: "Design", applicants: 61, status: "Open" },
-  { id: 4, title: "DevOps Engineer", dept: "Infrastructure", applicants: 47, status: "Closed" },
-  { id: 5, title: "Product Manager", dept: "Product", applicants: 73, status: "Open" },
-];
+
+
 
 const STATUS_STYLES = {
   Screening: "bg-amber-100 text-amber-700",
@@ -75,6 +58,59 @@ const STATUS_STYLES = {
   "Offer Sent": "bg-indigo-100 text-indigo-700",
   Hired: "bg-emerald-100 text-emerald-700",
   Rejected: "bg-rose-100 text-rose-700",
+};
+
+useEffect(() => {
+  loadOverview();
+  fetchCandidates();
+}, []);
+
+const loadOverview = async () => {
+  try {
+
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/admin/hr-overview`,
+      {
+        headers:{
+          Authorization:`Bearer ${token}`
+        }
+      }
+    );
+
+    const data = response.data;
+
+    setOverview(data.statistics);
+    setTrend(data.applicantTrend);
+    setFunnel(data.hiringFunnel);
+    setCandidates(data.recentCandidates);
+    setPostings(data.jobPostings);
+
+  } catch(err){
+
+    console.error(err);
+
+  }
+};
+const fetchCandidates = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/hr/applications`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setCandidates(response.data.applications);
+
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 function initials(name) {
@@ -129,7 +165,7 @@ export default function AdminHrOverview({ darkMode, roleLabel }) {
       ["Avg. Time to Hire", "16 days"],
       [],
       ["Candidate", "Role", "AI Match Score", "Status"],
-      ...candidates.map((c) => [c.name, c.role, `${c.score}%`, c.status]),
+      ...candidates.map((c) => [c.candidate_name, c.job_title, `${c.match_score}%`, c.status]),
     ];
     const csv = rows.map((r) => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
@@ -140,6 +176,51 @@ export default function AdminHrOverview({ darkMode, roleLabel }) {
     link.click();
     URL.revokeObjectURL(url);
   };
+
+  const shortlistCandidate = async (applicationId) => {
+  try {
+
+    const token = localStorage.getItem("token");
+
+    await axios.put(
+      `${import.meta.env.VITE_API_URL}/api/hr/applications/${applicationId}/shortlist`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    fetchCandidates();
+
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const rejectCandidate = async (applicationId) => {
+  try {
+
+    const token = localStorage.getItem("token");
+
+    await axios.put(
+      `${import.meta.env.VITE_API_URL}/api/hr/applications/${applicationId}/reject`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    fetchCandidates();
+
+  } catch (error) {
+    console.error(error);
+  }
+};
+fetchCandidates();
 
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
 
@@ -222,7 +303,7 @@ export default function AdminHrOverview({ darkMode, roleLabel }) {
           icon={Users}
           tint="bg-blue-600"
           label="Total Applicants"
-          value="1,284"
+          value={overview?.totalApplicants || 0}
           delta="12.4%"
           deltaLabel="vs. last month"
           positive
@@ -232,7 +313,7 @@ export default function AdminHrOverview({ darkMode, roleLabel }) {
           icon={Briefcase}
           tint="bg-emerald-600"
           label="Active Job Postings"
-          value={postings.filter((p) => p.status === "Open").length}
+          value={overview?.activeJobPostings || 0}
           delta="+3"
           deltaLabel="vs. last month"
           positive
@@ -242,7 +323,7 @@ export default function AdminHrOverview({ darkMode, roleLabel }) {
           icon={CalendarClock}
           tint="bg-indigo-600"
           label="Interviews This Week"
-          value="42"
+          value={overview?.interviewsThisWeek || 0}
           delta="6.1%"
           deltaLabel="vs. last week"
           positive={false}
@@ -252,7 +333,7 @@ export default function AdminHrOverview({ darkMode, roleLabel }) {
           icon={Timer}
           tint="bg-amber-500"
           label="Avg. Time to Hire"
-          value="16 days"
+          value={`${overview?.averageTimeToHire || 0} days`}
           delta="2 days"
           deltaLabel="faster than last month"
           positive
@@ -268,7 +349,7 @@ export default function AdminHrOverview({ darkMode, roleLabel }) {
           </p>
           <div className="h-64 mt-4 -ml-2">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={APPLICANT_TREND}>
+              <AreaChart data={trend}>
                 <defs>
                   <linearGradient id="applicantFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#2563eb" stopOpacity={0.35} />
@@ -337,7 +418,7 @@ export default function AdminHrOverview({ darkMode, roleLabel }) {
         </p>
         <div className="h-56 mt-4 -ml-2">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={HIRING_FUNNEL} barSize={42}>
+            <BarChart data={funnel} barSize={42}>
               <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#1e293b" : "#e2e8f0"} vertical={false} />
               <XAxis dataKey="stage" stroke={darkMode ? "#64748b" : "#94a3b8"} fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke={darkMode ? "#64748b" : "#94a3b8"} fontSize={12} tickLine={false} axisLine={false} />

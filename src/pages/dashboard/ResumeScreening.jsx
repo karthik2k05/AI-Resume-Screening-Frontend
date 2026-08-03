@@ -216,8 +216,50 @@ export default function ResumeScreening() {
   }
 };
 
-const handleClearAll = () => {
-  alert("Backend Clear All API not connected yet.");
+const handleClearAll = async () => {
+
+  if (batch.length === 0) return;
+
+  const confirmDelete = window.confirm(
+    `Remove all ${batch.length} screened resumes? This can't be undone.`
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+
+    const token = localStorage.getItem("token");
+
+    await axios.delete(
+      `${import.meta.env.VITE_API_URL}/api/hr/resumes`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setBatch([]);
+
+    setDuplicateNames([]);
+
+    setFileErrors([]);
+
+    setExpandedHash(null);
+
+    alert("All resumes deleted successfully.");
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      error.response?.data?.message ||
+      "Failed to delete resumes."
+    );
+
+  }
+
 };
 
   const clearFilter = () => {

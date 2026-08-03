@@ -1,10 +1,41 @@
 import { useOutletContext } from "react-router-dom";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { HIRING_FUNNEL } from "../../data/mockDashboardData";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function Analytics() {
   const { darkMode } = useOutletContext();
+  const [hiringFunnel, setHiringFunnel] = useState([]);
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
+useEffect(() => {
+  fetchAnalytics();
+}, []);
+
+const fetchAnalytics = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/admin/overview`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const funnel =
+      res.data.hiringFunnel?.map((item) => ({
+        stage: item.status,
+        count: Number(item.count),
+      })) || [];
+
+    setHiringFunnel(funnel);
+
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
     <div className="space-y-6">
@@ -22,7 +53,7 @@ export default function Analytics() {
         </p>
         <div className="h-64 sm:h-72 mt-4 -ml-2">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={HIRING_FUNNEL} barSize={42}>
+            <BarChart data={hiringFunnel} barSize={42}>
               <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#1e293b" : "#e2e8f0"} vertical={false} />
               <XAxis dataKey="stage" stroke={darkMode ? "#64748b" : "#94a3b8"} fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke={darkMode ? "#64748b" : "#94a3b8"} fontSize={12} tickLine={false} axisLine={false} />
