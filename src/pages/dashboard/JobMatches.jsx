@@ -56,6 +56,7 @@ const fetchJobs = async () => {
         );
 
         setJobs(response.data.jobs);
+        console.log(response.data.jobs);
 
     } catch (error) {
         console.error(error);
@@ -121,13 +122,18 @@ const fetchJobs = async () => {
   }
 };
 
-  const filteredJobs = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return jobs;
-    return jobs.filter(
-      (j) => j.job_title.toLowerCase().includes(q) || j.company_name.toLowerCase().includes(q) || (j.description || "").toLowerCase().includes(q)
-    );
-  }, [searchQuery]);
+ const filteredJobs = useMemo(() => {
+  const q = searchQuery.trim().toLowerCase();
+
+  if (!q) return jobs;
+
+  return jobs.filter(
+    (j) =>
+      j.title.toLowerCase().includes(q) ||
+      j.company.toLowerCase().includes(q) ||
+      (j.description || "").toLowerCase().includes(q)
+  );
+}, [jobs, searchQuery]);
   const totalRecords = filteredJobs.length;
 
 const totalPages = Math.max(1, Math.ceil(totalRecords / limit));
@@ -233,12 +239,16 @@ const paginatedJobs = filteredJobs.slice(start, end);
                 <div key={j.job_id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 sm:px-6 py-4 border-t first:border-t-0 ${darkMode ? "border-slate-800" : "border-slate-100"}`}>
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="font-medium">{j.job_title}</p>
-                      <span className="text-xs font-semibold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">ATS Match</span>
+                      <p className="font-medium">{j.title}</p>
+                      <span className="text-xs font-semibold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">
+  {j.matchScore}% Match
+</span>
                     </div>
                     <p className={`text-xs mt-1 flex items-center gap-1 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
-                      {j.company_name}
+                      {j.company}
                       <span className="mx-1">·</span>
+                       <MapPin size={12} />
+  {j.location}
                       
                     </p>
                   </div>
