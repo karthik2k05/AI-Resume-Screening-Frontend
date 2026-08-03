@@ -21,13 +21,18 @@ export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
   const cardBg = darkMode ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200";
   const [overview, setOverview] = useState(null);
   const openPostings = overview?.statistics?.activeJobPostings ?? 0;
-  useEffect(() => {
+useEffect(() => {
   const fetchOverview = async () => {
     try {
       const token = localStorage.getItem("token");
 
+      const endpoint =
+        role === "hr"
+          ? "/api/hr/dashboard"
+          : "/api/admin/overview";
+
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/admin/overview`,
+        `${import.meta.env.VITE_API_URL}${endpoint}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -43,7 +48,7 @@ export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
   };
 
   fetchOverview();
-}, []);
+}, [role]);
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -54,25 +59,42 @@ export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
         </p>
       </div>
 
-      {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <StatCard darkMode={darkMode} icon={Users} tint="bg-blue-600" label="Total Applicants" value={overview?.statistics.totalApplicants ?? 0} delta="12.4%" deltaLabel="vs. last month" positive />
-        <StatCard darkMode={darkMode} icon={Briefcase} tint="bg-emerald-600" label="Active Job Postings" value={overview?.statistics.activeJobPostings ?? 0} delta="+3" deltaLabel="vs. last month" positive />
-        <StatCard
+    {/* KPI cards */}
+<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+
+  <StatCard
+    darkMode={darkMode}
+    icon={Users}
+    tint="bg-blue-600"
+    label="Total Applicants"
+    value={overview?.statistics?.totalApplicants ?? 0}
+  />
+
+  <StatCard
+    darkMode={darkMode}
+    icon={Briefcase}
+    tint="bg-emerald-600"
+    label="Active Job Postings"
+    value={overview?.statistics?.activeJobPostings ?? 0}
+  />
+
+  <StatCard
     darkMode={darkMode}
     icon={CalendarClock}
     tint="bg-indigo-600"
     label="Interviews This Week"
-    value={overview?.interviewsThisWeek || 0}
+    value={overview?.statistics?.interviewsThisWeek ?? 0}
   />
-        <StatCard
+
+  <StatCard
     darkMode={darkMode}
     icon={Timer}
     tint="bg-amber-500"
     label="Average ATS Score"
-    value={`${overview?.averageATSScore || 0}%`}
+    value={`${overview?.statistics?.averageATSScore ?? 0}%`}
   />
-      </div>
+
+</div>
 
       {/* Charts */}
       <div className="grid lg:grid-cols-3 gap-5 sm:gap-6">
@@ -130,7 +152,7 @@ export default function AdminOverviewSummary({ darkMode, roleLabel, role }) {
           <div>
             <p className="font-semibold">Review candidates</p>
             <p className={`text-xs mt-1 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
-              8 in your pipeline right now
+              {overview?.statistics?.totalApplicants ?? 0} candidates in your pipeline
             </p>
           </div>
           <ArrowRight size={18} className="text-blue-600" />
