@@ -297,48 +297,40 @@ fetchCandidates();
       )}
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <StatCard
-          darkMode={darkMode}
-          icon={Users}
-          tint="bg-blue-600"
-          label="Total Applicants"
-          value={overview?.totalApplicants || 0}
-          delta="12.4%"
-          deltaLabel="vs. last month"
-          positive
-        />
-        <StatCard
-          darkMode={darkMode}
-          icon={Briefcase}
-          tint="bg-emerald-600"
-          label="Active Job Postings"
-          value={overview?.activeJobPostings || 0}
-          delta="+3"
-          deltaLabel="vs. last month"
-          positive
-        />
-        <StatCard
-          darkMode={darkMode}
-          icon={CalendarClock}
-          tint="bg-indigo-600"
-          label="Interviews This Week"
-          value={overview?.interviewsThisWeek || 0}
-          delta="6.1%"
-          deltaLabel="vs. last week"
-          positive={false}
-        />
-        <StatCard
-          darkMode={darkMode}
-          icon={Timer}
-          tint="bg-amber-500"
-          label="Avg. Time to Hire"
-          value={`${overview?.averageTimeToHire || 0} days`}
-          delta="2 days"
-          deltaLabel="faster than last month"
-          positive
-        />
-      </div>
+      {/* KPI cards */}
+<div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+  <StatCard
+    darkMode={darkMode}
+    icon={Users}
+    tint="bg-blue-600"
+    label="Total Applicants"
+    value={overview?.totalApplicants || 0}
+  />
+
+  <StatCard
+    darkMode={darkMode}
+    icon={Briefcase}
+    tint="bg-emerald-600"
+    label="Active Job Postings"
+    value={overview?.activeJobPostings || 0}
+  />
+
+  <StatCard
+    darkMode={darkMode}
+    icon={CalendarClock}
+    tint="bg-indigo-600"
+    label="Interviews This Week"
+    value={overview?.interviewsThisWeek || 0}
+  />
+
+  <StatCard
+    darkMode={darkMode}
+    icon={Timer}
+    tint="bg-amber-500"
+    label="Average ATS Score"
+    value={`${overview?.averageATSScore || 0}%`}
+  />
+</div>
 
       {/* Charts */}
       <div className="grid lg:grid-cols-3 gap-5 sm:gap-6">
