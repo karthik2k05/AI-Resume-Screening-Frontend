@@ -5,8 +5,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import Overview from "./pages/dashboard/Overview";
+import CandidatesAdmin from "./pages/dashboard/CandidatesAdmin";
 import CandidatesHR from "./pages/dashboard/CandidatesHR";
-import Candidates from "./pages/dashboard/CandidatesAdmin";
 import JobPostings from "./pages/dashboard/JobPostings";
 import Analytics from "./pages/dashboard/Analytics";
 import ResumeScreening from "./pages/dashboard/ResumeScreening";
@@ -47,8 +47,8 @@ function App() {
         >
          <Route index element={<Overview />} />
           {/* admin / hr */}
-          <Route path="candidatesHR" element={<CandidatesHR />} />
           <Route path="candidates" element={<CandidatesAdmin />} />
+          <Route path="candidatesHR" element={<CandidatesHR />} />
           <Route path="jobs" element={<JobPostings />} />
           <Route path="screening" element={<ResumeScreening />} />
           <Route path="analytics" element={<Analytics />} />
