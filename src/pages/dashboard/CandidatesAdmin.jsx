@@ -184,22 +184,23 @@ const end = Math.min(page * limit, totalRecords);
                     </td>
 
                     <td className="px-4 py-4">
-                      {c.role}
+                      {c.role || "-"}
                     </td>
 
                     <td className="px-4 py-4">
-
-                      <span
-                        className={
-                          Number(c.score) >= 85
-                            ? "text-emerald-600 font-semibold"
-                            : Number(c.score) >= 70
-                            ? "text-amber-600 font-semibold"
-                            : "text-rose-600 font-semibold"
-                        }
-                      >
-                        {c.score}%
-                      </span>
+  <span
+    className={
+      c.score > 0
+        ? Number(c.score) >= 85
+          ? "text-emerald-600 font-semibold"
+          : Number(c.score) >= 70
+          ? "text-amber-600 font-semibold"
+          : "text-rose-600 font-semibold"
+        : "text-gray-400"
+    }
+  >
+    {c.score > 0 ? `${c.score}%` : "-"}
+  </span>
 
                     </td>
 
@@ -208,7 +209,7 @@ const end = Math.min(page * limit, totalRecords);
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-semibold ${STATUS_STYLES[c.status]}`}
                       >
-                        {c.status}
+                        {c.status || "Registered"}
                       </span>
 
                     </td>
