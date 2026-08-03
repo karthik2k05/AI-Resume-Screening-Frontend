@@ -8,7 +8,9 @@ import Overview from "./pages/dashboard/Overview";
 import CandidatesAdmin from "./pages/dashboard/CandidatesAdmin";
 import CandidatesHR from "./pages/dashboard/CandidatesHR";
 import JobPostings from "./pages/dashboard/JobPostings";
-import Analytics from "./pages/dashboard/Analytics";
+
+import AnalyticsAdmin from "./pages/dashboard/AnalyticsAdmin";
+import AnalyticsHR from "./pages/dashboard/AnalyticsHR";
 import ResumeScreening from "./pages/dashboard/ResumeScreening";
 import Applications from "./pages/dashboard/Applications";
 import JobMatches from "./pages/dashboard/JobMatches";
@@ -57,11 +59,18 @@ function App() {
         : <CandidatesAdmin />
     }
   />
-      
+             <Route
+  path="analytics"
+  element={
+    role === "hr"
+      ? <AnalyticsHR darkMode={darkMode}/>
+      : <AnalyticsAdmin darkMode={darkMode}/>
+  }
+/>
 
           <Route path="jobs" element={<JobPostings />} />
           <Route path="screening" element={<ResumeScreening />} />
-          <Route path="analytics" element={<Analytics />} />
+          
           <Route path="support" element={<SupportChats />} />
           <Route path="feedbacks" element={<Feedbacks />} />
 
