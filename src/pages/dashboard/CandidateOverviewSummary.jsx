@@ -23,12 +23,7 @@ import {
   FileText,
 } from "lucide-react";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
 
-const token = localStorage.getItem("token");
-const user = token ? jwtDecode(token) : null;
-
-const candidateName = user?.name || "Candidate";
 function scoreLabel(score) {
   if (score >= 85) return "Strong ATS match — this resume should pass most automated screens.";
   if (score >= 65) return "Decent match, but a few gaps could hold it back with certain ATS filters.";
@@ -45,6 +40,7 @@ export default function CandidateOverviewSummary({ darkMode }) {
   const [errorMsg, setErrorMsg] = useState("");
   const [jobCount, setJobCount] = useState(0);
   const [applicationCount, setApplicationCount] = useState(0);
+  const [candidateName, setCandidateName] = useState("Candidate");
     
   const fetchLatestResume = async () => {
 
@@ -118,10 +114,32 @@ const fetchJobMatches = async () => {
   }
 };
 
+const fetchProfile = async () => {
+  try {
+
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/candidate/profile`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setCandidateName(response.data.user.name);
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 useEffect(() => {
     fetchLatestResume();
     fetchApplications();
     fetchJobMatches();
+    fetchProfile();
 }, []);
 
 
