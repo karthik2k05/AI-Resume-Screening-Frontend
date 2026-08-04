@@ -18,7 +18,7 @@ const ROLE_LABELS = {
   candidate: "Candidate",
 };
 
-export default function Login() {
+export default function Login({ darkMode }) {
   const { role } = useParams();
   const navigate = useNavigate();
   const roleLabel = ROLE_LABELS[role] || "Candidate";
@@ -104,7 +104,13 @@ const handleGoogleLogin = async () => {
 };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-8 bg-gradient-to-br from-slate-100 via-blue-100 to-indigo-200 relative overflow-hidden">
+   <div
+  className={`min-h-screen flex items-center justify-center px-6 py-8 relative overflow-hidden ${
+    darkMode
+      ? "bg-slate-950"
+      : "bg-gradient-to-br from-slate-100 via-blue-100 to-indigo-200"
+  }`}
+>
       {/* Background Effects */}
       <div className="absolute top-0 left-0 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl"></div>
@@ -117,7 +123,11 @@ const handleGoogleLogin = async () => {
         Back to home
       </Link>
 
-      <div className="relative z-10 w-full max-w-4xl h-[600px] bg-white rounded-[24px] overflow-hidden shadow-2xl grid md:grid-cols-[1fr_1fr]">
+      <div
+  className={`relative z-10 w-full max-w-4xl h-[600px] rounded-[24px] overflow-hidden shadow-2xl grid md:grid-cols-[1fr_1fr] ${
+    darkMode ? "bg-slate-900" : "bg-white"
+  }`}
+>
         {/* LEFT PANEL */}
         <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950 text-white p-8 flex items-center justify-center">
           <div className="text-center">
@@ -150,39 +160,71 @@ const handleGoogleLogin = async () => {
         {/* RIGHT PANEL */}
         <div className="p-12 flex items-center">
           <div className="w-full">
-            <h2 className="text-3xl font-bold text-gray-800 text-center">
+            <h2
+  className={`text-3xl font-bold text-center ${
+    darkMode ? "text-white" : "text-gray-800"
+  }`}
+>
               LOGIN
             </h2>
-            <p className="text-md text-gray-500 text-center mt-2 mb-6">
+            <p
+  className={`text-md text-center mt-2 mb-6 ${
+    darkMode ? "text-gray-300" : "text-gray-500"
+  }`}
+>
               Login to your account
             </p>
 
             {/* EMAIL */}
             <div className="mb-5">
-              <label className="font-medium text-gray-700">Email</label>
-              <div className="mt-2 flex items-center h-10 rounded-lg border border-gray-300 bg-gray-50 px-3 focus-within:border-blue-700 transition">
+              <label
+  className={`font-medium ${
+    darkMode ? "text-gray-200" : "text-gray-700"
+  }`}
+>Email</label>
+              <div className={`mt-2 flex items-center h-10 rounded-lg border px-3 transition ${
+  darkMode
+  ? "bg-slate-800 border-slate-600"
+  : "bg-gray-50 border-gray-300"
+}`}>
                 <FaEnvelope className="text-blue-600 mr-3" />
                 <input
                   type="email"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm text-black"
+                className={`w-full outline-none text-sm ${
+  darkMode
+    ? "bg-slate-800 !text-white placeholder-gray-400"
+    : "bg-gray-50 text-black placeholder-gray-500"
+}`}
                 />
               </div>
             </div>
 
             {/* PASSWORD */}
             <div>
-              <label className="font-medium text-gray-700">Password</label>
-              <div className="mt-2 flex items-center h-10 rounded-lg border border-gray-300 bg-gray-50 px-3 focus-within:border-blue-700 transition">
+              <label
+  className={`font-medium ${
+    darkMode ? "text-gray-200" : "text-gray-700"
+  }`}
+>Password</label>
+              <div className={`mt-2 flex items-center h-10 rounded-lg border px-3 transition ${
+  darkMode
+    ? "bg-slate-800 border-slate-700"
+    : "bg-gray-50 border-gray-300"
+}`}>
                 <FaLock className="text-blue-700 mr-2 text-sm" />
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm text-black"
+                  className={`w-full outline-none text-sm ${
+  darkMode
+    ? "bg-slate-800 text-white placeholder-gray-400"
+    : "bg-gray-50 text-black placeholder-gray-500"
+}`}
                 />
                 <button
                   type="button"
@@ -198,7 +240,9 @@ const handleGoogleLogin = async () => {
             </div>
 
             {/* REMEMBER */}
-            <div className="flex justify-between items-center mt-4 text-sm">
+            <div className={`flex items-center gap-2 ${
+  darkMode ? "text-gray-300" : "text-gray-600"
+}`}>
               <label className="flex items-center gap-2 text-gray-600">
                 <input
                   type="checkbox"
@@ -222,7 +266,11 @@ const handleGoogleLogin = async () => {
             </button>
 
             {/* REGISTER */}
-            <p className="text-center mt-5 text-sm text-gray-600">
+            <p
+  className={`text-center mt-5 text-sm ${
+    darkMode ? "text-gray-300" : "text-gray-600"
+  }`}
+>
               Don't have an account?
               <Link
                 to="/register"

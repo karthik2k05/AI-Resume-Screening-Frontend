@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useOutletContext } from "react-router-dom";
 import SupportAPI from "../../api/supportApi";
 import socket from "../../services/socket";
 import SupportSidebar from "./supportchat/SupportSidebar";
@@ -8,6 +8,11 @@ import MessageList from "./supportchat/MessageList";
 import ChatInput from "./supportchat/ChatInput";
 
 export default function SupportChats() {
+  const { darkMode } = useOutletContext();
+
+const bg = darkMode ? "bg-[#0f172a]" : "bg-gray-100";
+const card = darkMode ? "bg-[#1e293b]" : "bg-white";
+const text = darkMode ? "text-white" : "text-gray-900";
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
     const [messages, setMessages] = useState({});
@@ -172,7 +177,8 @@ const selectedCandidateFromNotification =
       
 
   return (
-    <div className="h-[calc(100vh-90px)] flex bg-white rounded-xl shadow overflow-hidden">
+    <div
+  className={`h-[calc(100vh-90px)] flex ${card} ${text} rounded-xl shadow overflow-hidden`}>
 
       {/* Left Sidebar */}
 
@@ -183,6 +189,7 @@ const selectedCandidateFromNotification =
   loadMessages={loadMessages}
   search={search}
   setSearch={setSearch}
+  darkMode={darkMode}
 />
 
       {/* Right Chat Area */}
@@ -198,29 +205,36 @@ const selectedCandidateFromNotification =
       <ChatHeader
   selectedUser={selectedUser}
   endChat={endChat}
+  darkMode={darkMode}
 />
 
       {/* Messages */}
 
       <MessageList
-    selectedUser={selectedUser}
-    messages={messages}
-    bottomRef={bottomRef}
+  selectedUser={selectedUser}
+  messages={messages}
+  bottomRef={bottomRef}
+  darkMode={darkMode}
 />
 
       {/* Reply Box */}
 
       <ChatInput
-    input={input}
-    setInput={setInput}
-    sendReply={sendReply}
+  input={input}
+  setInput={setInput}
+  sendReply={sendReply}
+  darkMode={darkMode}
 />
 
     </>
 
   ) : (
 
-    <div className="flex flex-1 items-center justify-center text-gray-500">
+    <div
+  className={`flex flex-1 items-center justify-center ${
+    darkMode ? "text-gray-300" : "text-gray-500"
+  }`}
+>
 
       <div className="text-center">
 

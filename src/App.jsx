@@ -8,7 +8,6 @@ import Overview from "./pages/dashboard/Overview";
 import CandidatesAdmin from "./pages/dashboard/CandidatesAdmin";
 import CandidatesHR from "./pages/dashboard/CandidatesHR";
 import JobPostings from "./pages/dashboard/JobPostings";
-
 import AnalyticsAdmin from "./pages/dashboard/AnalyticsAdmin";
 import AnalyticsHR from "./pages/dashboard/AnalyticsHR";
 import ResumeScreening from "./pages/dashboard/ResumeScreening";
@@ -21,7 +20,9 @@ import ChatBot from "./chatbot/ChatBot";
 
 
 function App() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+  return localStorage.getItem("theme") === "dark";
+});
 
   const location = useLocation();
 

@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import SupportAPI from "../../api/supportApi";
 
 export default function Feedbacks() {
+  const { darkMode } = useOutletContext();
+
+const bg = darkMode ? "bg-[#0f172a]" : "bg-gray-100";
+const card = darkMode ? "bg-[#1e293b]" : "bg-white";
+const text = darkMode ? "text-white" : "text-gray-900";
+const subText = darkMode ? "text-gray-300" : "text-gray-500";
+const border = darkMode ? "border-gray-700" : "border-gray-200";
+const input = darkMode
+  ? "bg-[#111827] text-white border-gray-700"
+  : "bg-white text-black border-gray-300";
   const [feedbacks, setFeedbacks] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,27 +54,17 @@ const totalPages = Math.ceil(
   };
 
   return (
-    <div className="p-0.5">
+    <div className={`p-0.5 min-h-screen ${bg} ${text}`}>
 
       <h1 className="text-2xl font-bold mb-3 ">
         Candidate Feedbacks
       </h1>
       <div className="grid grid-cols-2 gap-6 mb-6">
 
-  <div className="
-bg-white
-rounded-2xl
-shadow-md
-p-6
-transition-all
-duration-300
-hover:shadow-2xl
-hover:-translate-y-1
-hover:scale-[1.02]
-cursor-pointer
-">
+  <div
+  className={`${card} rounded-2xl shadow-md p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:scale-[1.02] cursor-pointer`}>
 
-    <h3 className="text-gray-500">
+    <h3 className={subText}>
       Total Feedbacks
     </h3>
 
@@ -73,22 +74,13 @@ cursor-pointer
 
   </div>
 
-  <div className="
-bg-white
-rounded-2xl
-shadow-md
-p-6
-transition-all
-duration-300
-hover:shadow-2xl
-hover:-translate-y-1
-hover:scale-[1.02]
-cursor-pointer
-">
+  <div
+  className={`${card} rounded-2xl shadow-md p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 hover:scale-[1.02] cursor-pointer`}
+>
 
-    <h3 className="text-gray-500">
-      Average Rating
-    </h3>
+    <h3 className={subText}>
+  Average Rating
+</h3>
 
     <h1 className="text-3xl font-bold text-yellow-500 mt-2">
       ⭐ {averageRating}
@@ -101,33 +93,10 @@ cursor-pointer
   type="text"
   placeholder="Search Candidate..."
   value={search}
-  onChange={(e) =>{ setSearch(e.target.value);setCurrentPage;}}
-  className="
-w-full
-mb-6
-px-4
-py-2
-rounded-xl
-border-gray-300
-outline-none
-transition-all
-duration-300
-focus:ring-4
-focus:ring-blue-200
-focus:border-blue-600
-"
-/>
+  onChange={(e) =>{ setSearch(e.target.value);setCurrentPage(1);}}
+  className={`w-full mb-6 px-4 py-2 rounded-xl border outline-none transition-all duration-300 focus:ring-4 focus:ring-blue-200 focus:border-blue-600 ${input}`}/>
 
-      <div
-className="
-bg-white
-rounded-2xl
-shadow-xl
-overflow-hidden
-border
-border-gray-100
-"
->
+      <div className={`${card} rounded-2xl shadow-xl overflow-hidden border ${border}`}>
 
         <table className="w-full">
 
@@ -159,21 +128,12 @@ border-gray-100
 
           </thead>
 
-          <tbody className="bg-gray-100">
+          <tbody className={darkMode ? "bg-[#111827]" : "bg-gray-100"}>
 
             {currentFeedbacks.map((feedback) => (
 
-              <tr
-                key={feedback.feedback_id}
-                className="
-bg-white
-shadow-sm
-hover:shadow-lg
-transition-all
-duration-300
-hover:scale-[1.005]
-"
-              >
+              <tr key={feedback.feedback_id}
+              className={`${card} shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-[1.005]`}>
 
                 <td className="p-3">
                   {feedback.candidate_name}
@@ -186,11 +146,9 @@ hover:scale-[1.005]
                 <td className="p-3 text-center">
                   {"⭐".repeat(feedback.rating)}
                 </td>
-                <div className="text-yellow-500">
-                <td className="p-3">
-                  {feedback.comments}
-                </td>
-                </div>
+                <td className="p-3 text-yellow-500">
+  {feedback.comments}
+</td>
 
                 <td className="p-3">
                   {new Date(feedback.created_at).toLocaleString("en-IN", {
@@ -208,10 +166,11 @@ hover:scale-[1.005]
         </table>
 
       </div>
-      <div className="flex items-center justify-between mt-6 bg-white p-3 rounded-xl shadow">
+      <div
+  className={`flex items-center justify-between mt-6 ${card} p-3 rounded-xl shadow`}>
 
   {/* Left Side */}
-  <div className="text-gray-600">
+  <div className={darkMode ? "text-gray-300" : "text-gray-600"}>
     Showing{" "}
     <span className="font-semibold">
       {filteredFeedbacks.length === 0
@@ -233,9 +192,9 @@ hover:scale-[1.005]
   <div className="flex items-center gap-5">
 
     <div className="flex items-center gap-2">
-      <span className="text-gray-600">
-        Rows
-      </span>
+      <span className={darkMode ? "text-gray-300" : "text-gray-600"}>
+  Rows
+</span>
 
       <select
         value={feedbacksPerPage}
@@ -243,8 +202,7 @@ hover:scale-[1.005]
           setFeedbacksPerPage(Number(e.target.value));
           setCurrentPage(1);
         }}
-        className="border rounded-lg px-3 py-2"
-      >
+        className={`border rounded-lg px-3 py-2 ${input}`}>
         <option value={5}>5</option>
         <option value={10}>10</option>
         <option value={20}>20</option>
@@ -257,16 +215,8 @@ hover:scale-[1.005]
       onClick={() =>
         setCurrentPage((prev) => prev - 1)
       }
-      className="
-      px-5
-      py-2
-      rounded-xl
-      border
-      disabled:opacity-50
-      disabled:cursor-not-allowed
-      hover:bg-gray-100
-      "
-    >
+      className={`px-5 py-2 rounded-xl border ${border} disabled:opacity-50 disabled:cursor-not-allowed ${
+  darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"}`}>
       Previous
     </button>
 
@@ -288,15 +238,9 @@ hover:scale-[1.005]
       onClick={() =>
         setCurrentPage((prev) => prev + 1)
       }
-      className="
-      px-5
-      py-2
-      rounded-xl
-      border
-      disabled:opacity-50
-      disabled:cursor-not-allowed
-      hover:bg-gray-100
-      "
+      className={`px-5 py-2 rounded-xl border ${border} disabled:opacity-50 disabled:cursor-not-allowed ${
+  darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+}`}
     >
       Next
     </button>

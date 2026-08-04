@@ -1,8 +1,18 @@
 import { FaCircle, FaUserCircle } from "react-icons/fa";
 
-export default function ChatHeader({ selectedUser,endChat }) {
+export default function ChatHeader({
+  selectedUser,
+  endChat,
+  darkMode,
+}) {
+  const bg = darkMode ? "bg-[#1e293b]" : "bg-blue-300";
+const text = darkMode ? "text-white" : "text-gray-800";
+const subText = darkMode ? "text-gray-300" : "text-gray-500";
+const border = darkMode ? "border-gray-700" : "border-gray-200";
+
   return (
-    <div className="bg-blue-300 border-b border-gray-200 px-5 py-4 flex items-center justify-between shadow-sm rounded-lg">
+    <div
+  className={`${bg} border-b ${border} px-5 py-4 flex items-center justify-between shadow-sm rounded-lg`}>
 
       <div className="flex items-center gap-4">
 
@@ -13,7 +23,7 @@ export default function ChatHeader({ selectedUser,endChat }) {
 
         <div>
 
-          <h2 className="text-xl font-bold text-gray-800">
+          <h2 className={`text-xl font-bold ${text}`}>
             {selectedUser.username}
           </h2>
           
@@ -25,7 +35,7 @@ export default function ChatHeader({ selectedUser,endChat }) {
               className="text-green-500"
             />
 
-            <span className="text-sm text-gray-500">
+            <span className={`text-sm ${subText}`}>
               Online
             </span>
 

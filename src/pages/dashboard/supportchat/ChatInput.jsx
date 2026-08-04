@@ -2,9 +2,17 @@ export default function ChatInput({
   input,
   setInput,
   sendReply,
+  darkMode,
 }) {
+  const bg = darkMode ? "bg-[#1e293b]" : "bg-blue-50";
+
+const inputStyle = darkMode
+  ? "bg-[#111827] text-white border-gray-700 placeholder-gray-400"
+  : "bg-white text-black border-gray-300 placeholder-gray-500";
+
   return (
-    <div className="bg-blue-50 shadow-lg rounded-b-2xl rounded-lg p-3 flex gap-3 ">
+    <div
+  className={`${bg} shadow-lg rounded-b-2xl rounded-lg p-3 flex gap-3`}>
 
       <input
         value={input}
@@ -15,20 +23,7 @@ export default function ChatInput({
           }
         }}
         placeholder="Type your reply..."
-        className="
-          flex-1
-          placeholder-gray-500
-          rounded-xl
-          border
-          border-gray-300
-          px-4
-          py-3
-          outline-none
-          focus:ring-2
-          focus:ring-blue-500
-          focus:border-blue-500
-        "
-      />
+        className={`flex-1 rounded-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${inputStyle}`}/>
 
       <button
         onClick={sendReply}
