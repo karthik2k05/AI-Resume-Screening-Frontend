@@ -39,9 +39,9 @@ function App() {
     >
       <Routes>
         <Route path="/" element={<LandingPage darkMode={darkMode} setDarkMode={setDarkMode} />}/>
-        <Route path="/login" element={<Login />} />
-        <Route path="/login/:role" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/login/:role" element={<Login darkMode={darkMode} setDarkMode={setDarkMode} />} />
+        <Route path="/register" element={<Register darkMode={darkMode} setDarkMode={setDarkMode} />} />
         <Route
           path="/dashboard/:role"
           element={<DashboardLayout darkMode={darkMode} setDarkMode={setDarkMode} />}

@@ -18,7 +18,7 @@ const ROLE_LABELS = {
   candidate: "Candidate",
 };
 
-export default function Login({ darkMode }) {
+export default function Login({ darkMode, setDarkMode }) {
   const { role } = useParams();
   const navigate = useNavigate();
   const roleLabel = ROLE_LABELS[role] || "Candidate";
