@@ -23,7 +23,12 @@ import {
   FileText,
 } from "lucide-react";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
+const token = localStorage.getItem("token");
+const user = token ? jwtDecode(token) : null;
+
+const candidateName = user?.name || "Candidate";
 function scoreLabel(score) {
   if (score >= 85) return "Strong ATS match — this resume should pass most automated screens.";
   if (score >= 65) return "Decent match, but a few gaps could hold it back with certain ATS filters.";
@@ -174,7 +179,7 @@ setAnalysis(response.data.resume);
     <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Welcome back, {user?.name || "Candidate"}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Welcome back, {candidateName}</h1>
           <p className={`mt-1 text-sm ${darkMode ? "text-slate-400" : "text-slate-500"}`}>
             Here's how your job search is progressing.
           </p>
