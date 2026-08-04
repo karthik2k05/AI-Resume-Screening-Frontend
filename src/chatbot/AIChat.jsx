@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { FaArrowLeft, FaPaperPlane, FaRobot } from "react-icons/fa";
 import { askAI } from "../services/aiService";
 
-export default function AIChat({ onBack }) {
+export default function AIChat({ onBack, darkMode }) {
   const [messages, setMessages] = useState([
     {
       sender: "bot",
@@ -72,7 +72,11 @@ Ask me anything about:
   };
 
   return (
-    <div className="h-[520px] flex flex-col bg-gray-50">
+    <div
+  className={`h-[520px] flex flex-col ${
+    darkMode ? "bg-slate-800" : "bg-gray-50"
+  }`}
+>
 
       {/* Header */}
 
@@ -120,7 +124,9 @@ Ask me anything about:
               className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-sm whitespace-pre-line ${
                 msg.sender === "user"
                   ? "bg-blue-600 text-white"
-                  : "bg-white border border-gray-200 text-gray-900"
+                  : darkMode
+  ? "bg-slate-700 border-slate-600 text-white"
+  : "bg-white border-gray-200 text-gray-900"
               }`}
             >
               {msg.text}
@@ -136,7 +142,13 @@ Ask me anything about:
 
           <div className="flex justify-start">
 
-            <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm">
+            <div
+  className={`rounded-2xl px-4 py-3 shadow-sm ${
+    darkMode
+      ? "bg-slate-700 border border-slate-600"
+      : "bg-white border border-gray-200"
+  }`}
+>
 
               <div className="typing">
 
@@ -146,7 +158,11 @@ Ask me anything about:
 
               </div>
 
-              <p className="text-sm text-gray-500 mt-2">
+              <p
+  className={`text-sm mt-2 ${
+    darkMode ? "text-gray-300" : "text-gray-500"
+  }`}
+>
                 ResumeIQ is typing...
               </p>
 
@@ -162,7 +178,13 @@ Ask me anything about:
 
       {/* Input */}
 
-      <div className="border-t border-gray-200 bg-white p-3 flex gap-2">
+      <div
+  className={`border-t p-3 flex gap-2 ${
+    darkMode
+      ? "border-slate-700 bg-slate-900"
+      : "border-gray-200 bg-white"
+  }`}
+>
 
         <input
           type="text"
@@ -174,19 +196,21 @@ Ask me anything about:
               sendMessage();
             }
           }}
-          className="flex-1
-                     bg-white
-                     text-black
-                     placeholder:text-gray-500
-                     border
-                     border-gray-300
-                     rounded-lg
-                     px-4
-                     py-3
-                     outline-none
-                     focus:ring-2
-                     focus:ring-blue-500
-                     focus:border-blue-500"
+          className={`flex-1
+             rounded-lg
+             px-4
+             py-3
+             outline-none
+             border
+             focus:ring-2
+             focus:ring-blue-500
+             focus:border-blue-500
+             ${
+               darkMode
+                 ? "bg-slate-800 text-white placeholder:text-gray-400 border-slate-600"
+                 : "bg-white text-black placeholder:text-gray-500 border-gray-300"
+             }`
+}
         />
 
         <button

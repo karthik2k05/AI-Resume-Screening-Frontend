@@ -85,7 +85,7 @@ function App() {
         
         </Route>
       </Routes>
-      {!hideChatbot && <ChatBot />}
+      {!hideChatbot && <ChatBot darkMode={darkMode} />}
     </div>
   );
 }

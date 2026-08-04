@@ -3,7 +3,7 @@ import { FaArrowLeft, FaPaperPlane, FaCircle } from "react-icons/fa";
 import socket from "../services/socket";
 import SupportAPI from "../api/supportApi";
 
-export default function LiveChat({ onBack }) {
+export default function LiveChat({ onBack, darkMode }) {
   // TODO: Replace with the logged-in username from your auth state
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -225,7 +225,11 @@ export default function LiveChat({ onBack }) {
 
   return (
     
-    <div className="h-[520px] flex flex-col bg-gray-100">
+    <div
+  className={`h-[520px] flex flex-col ${
+    darkMode ? "bg-slate-800" : "bg-gray-100"
+  }`}
+>
 
       {/* Header */}
       <div className="bg-blue-600 text-white p-4 flex items-center gap-3">
@@ -278,7 +282,9 @@ export default function LiveChat({ onBack }) {
   className={`max-w-[75%] rounded-xl px-4 py-3 shadow whitespace-pre-line ${
     msg.sender === "candidate"
       ? "bg-blue-600 text-white"
-      : "bg-white text-gray-900 border border-gray-200"
+      : darkMode
+  ? "bg-slate-700 text-white border-slate-600"
+  : "bg-white text-gray-900 border-gray-200"
   }`}
 >
 
@@ -314,7 +320,13 @@ export default function LiveChat({ onBack }) {
 
       {/* Input */}
 
-      <div className="border-t bg-white p-3 flex gap-2">
+      <div
+  className={`border-t p-3 flex gap-2 ${
+    darkMode
+      ? "bg-slate-900 border-slate-700"
+      : "bg-white border-gray-200"
+  }`}
+>
 
         <input
   type="text"
@@ -324,21 +336,22 @@ export default function LiveChat({ onBack }) {
     if (e.key === "Enter") sendMessage();
   }}
   placeholder="Type your message..."
-  className="
-    flex-1
-    bg-white
-    text-black
-    placeholder:text-gray-500
-    border
-    border-gray-300
-    rounded-lg
-    px-4
-    py-3
-    outline-none
-    focus:border-blue-500
-    focus:ring-2
-    focus:ring-blue-500
-  "
+  className={`
+flex-1
+rounded-lg
+px-4
+py-3
+outline-none
+border
+focus:border-blue-500
+focus:ring-2
+focus:ring-blue-500
+${
+  darkMode
+    ? "bg-slate-800 text-white placeholder:text-gray-400 border-slate-600"
+    : "bg-white text-black placeholder:text-gray-500 border-gray-300"
+}
+`}
 />
         
 

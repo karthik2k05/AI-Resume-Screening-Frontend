@@ -6,7 +6,7 @@ import AIChat from "./AIChat";
 import { useRef, useEffect } from "react";
 import LiveChat from "./LiveChat";
 
-export default function ChatBot() {
+export default function ChatBot({ darkMode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [showHelpOptions, setShowHelpOptions] = useState(false);
   const [currentMenu, setCurrentMenu] = useState("main");
@@ -79,7 +79,11 @@ export default function ChatBot() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-2xl border overflow-hidden z-50">
+        <div
+  className={`fixed bottom-6 right-6 w-96 h-[600px] rounded-2xl shadow-2xl border overflow-hidden z-50 ${
+    darkMode ? "bg-slate-900 border-slate-700" : "bg-white border-gray-200"
+  }`}
+>
 
           {/* Header */}
           <div className="bg-blue-600 text-white flex justify-between items-center px-5 py-4">
@@ -100,15 +104,25 @@ export default function ChatBot() {
 
           {/* Body */}
           {showLiveChat ? (
-    <LiveChat onBack={() => setShowLiveChat(false)} />
+    <LiveChat
+  darkMode={darkMode}
+  onBack={() => setShowLiveChat(false)}
+/>
 ) : 
           showAIChat ? (
 
-  <AIChat onBack={() => setShowAIChat(false)} />
+  <AIChat
+  darkMode={darkMode}
+  onBack={() => setShowAIChat(false)}
+/>
 
 ) : (
           
-<div className="p-4 h-[520px] overflow-y-auto bg-gray-50">
+<div
+  className={`p-4 h-[520px] overflow-y-auto ${
+    darkMode ? "bg-slate-800" : "bg-gray-50"
+  }`}
+>
     
 
   {currentMenu !== "main" && (
@@ -125,7 +139,11 @@ export default function ChatBot() {
   )}
 
   <div className="mb-5">
-    <h3 className="text-2xl font-bold text-gray-900">
+    <h3
+  className={`text-2xl font-bold ${
+    darkMode ? "text-white" : "text-gray-900"
+  }`}
+>
       {currentMenu === "main"
         ? "Hello 👋"
         : "Choose your issue"}
@@ -133,13 +151,27 @@ export default function ChatBot() {
     {
     selectedAnswer && (
 
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+        <div
+  className={`rounded-xl p-4 mb-4 border ${
+    darkMode
+      ? "bg-slate-700 border-slate-600"
+      : "bg-blue-50 border-blue-200"
+  }`}
+>
 
-            <h3 className="text-lg font-bold text-blue-800 mb-2">
+            <h3
+  className={`text-lg font-bold mb-2 ${
+    darkMode ? "text-blue-300" : "text-blue-800"
+  }`}
+>
                 {selectedAnswer.title}
             </h3>
 
-            <p className="text-gray-700 whitespace-pre-line">
+            <p
+  className={`whitespace-pre-line ${
+    darkMode ? "text-gray-200" : "text-gray-700"
+  }`}
+>
                 {selectedAnswer.answer}
             </p>
 
@@ -172,9 +204,19 @@ export default function ChatBot() {
 
     {showHelpOptions && (
 
-<div className="mt-4 border rounded-xl p-4 bg-gray-50">
+<div
+  className={`mt-4 border rounded-xl p-4 ${
+    darkMode
+      ? "bg-slate-700 border-slate-600"
+      : "bg-gray-50 border-gray-200"
+  }`}
+>
 
-<h4 className="font-semibold mb-3">
+<h4
+  className={`font-semibold mb-3 ${
+    darkMode ? "text-white" : "text-gray-900"
+  }`}
+>
 I'm sorry that didn't solve your problem.
 </h4>
 
@@ -195,7 +237,11 @@ className="w-full mb-2 bg-green-600 text-white py-2 rounded-lg hover:bg-green-70
 
 <button
 onClick={() => setShowHelpOptions(false)}
-className="w-full border py-2 rounded-lg hover:bg-gray-100"
+className={`w-full border py-2 rounded-lg ${
+  darkMode
+    ? "border-slate-500 text-white hover:bg-slate-600"
+    : "border-gray-300 hover:bg-gray-100"
+}`}
 >
 ⬅ Back
 </button>
@@ -205,7 +251,11 @@ className="w-full border py-2 rounded-lg hover:bg-gray-100"
 
 )}
 
-    <p className="text-gray-600 mt-1">
+    <p
+  className={`mt-1 ${
+    darkMode ? "text-gray-300" : "text-gray-600"
+  }`}
+>
       {currentMenu === "main"
         ? "How can I help you today?"
         : "Select one of the following options."}
@@ -220,25 +270,30 @@ chatbotFlow[currentMenu]?.map((item) => (
       <button
         key={item.id}
         onClick={() => handleMenuSelect(item.id)}
-        className="
-          w-full
-          flex
-          items-center
-          justify-between
-          px-4
-          py-2.5
-          rounded-xl
-          bg-white
-          border
-          border-gray-300
-          shadow-sm
-          hover:border-blue-500
-          hover:bg-blue-50
-          transition-all
-        "
+        className={`
+w-full
+flex
+items-center
+justify-between
+px-4
+py-2.5
+rounded-xl
+border
+shadow-sm
+transition-all
+${
+  darkMode
+    ? "bg-slate-900 border-slate-600 hover:bg-slate-700"
+    : "bg-white border-gray-300 hover:bg-blue-50"
+}
+`}
       >
 
-        <span className="text-gray-900 font-semibold text-base">
+        <span
+ className={`font-semibold text-base ${
+   darkMode ? "text-white" : "text-gray-900"
+ }`}
+>
           {item.title}
         </span>
 
