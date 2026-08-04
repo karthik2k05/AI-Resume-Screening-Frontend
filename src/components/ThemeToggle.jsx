@@ -6,11 +6,7 @@ export default function ThemeToggle({
 }) {
   return (
     <button
-      onClick={() => {
-  const newTheme = !darkMode;
-  setDarkMode(newTheme);
-  localStorage.setItem("theme", newTheme ? "dark" : "light");
-}}
+      onClick={() => setDarkMode(!darkMode)}
       aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
       className={`flex items-center justify-center w-10 h-10 rounded-lg transition
       ${

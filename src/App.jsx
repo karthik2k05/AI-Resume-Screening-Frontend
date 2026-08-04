@@ -20,9 +20,7 @@ import ChatBot from "./chatbot/ChatBot";
 
 
 function App() {
-  const [darkMode, setDarkMode] = useState(() => {
-  return localStorage.getItem("theme") === "dark";
-});
+  const [darkMode, setDarkMode] = useState(false);
 
   const location = useLocation();
 
