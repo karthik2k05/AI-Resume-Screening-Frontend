@@ -63,6 +63,15 @@ function App() {
           path="/register"
           element={<Register darkMode={darkMode} setDarkMode={setDarkMode} />}
         />
+        <Route
+  path="/register/:role"
+  element={
+    <Register
+      darkMode={darkMode}
+      setDarkMode={setDarkMode}
+    />
+  }
+/>
 
         <Route
           path="/dashboard/:role"
