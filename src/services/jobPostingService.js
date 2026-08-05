@@ -1,7 +1,7 @@
 import axios from "axios";
-
+console.log(import.meta.env.VITE_API_URL);
 const API = axios.create({
-  baseURL: "https://ai-resume-screening-backend-i5ki.onrender.com/api/admin/job-postings",
+  baseURL: `${import.meta.env.VITE_API_URL}/api/admin/job-postings`,
 });
 
 API.interceptors.request.use((config) => {

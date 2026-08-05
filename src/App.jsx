@@ -58,18 +58,17 @@ function App() {
         : <CandidatesAdmin />
     }
   />
-             <Route
-  path="analytics"
-  element={
-    location.pathname.includes("/dashboard/hr")
-      ? <AnalyticsHR darkMode={darkMode}/>
-      : <AnalyticsAdmin darkMode={darkMode}/>
-  }
-/>
-
-          <Route path="jobs" element={<JobPostings />} />
+            <Route path="jobs" element={<JobPostings />} />
           <Route path="screening" element={<ResumeScreening />} />
-          
+             <Route
+          path="analytics"
+          element={
+              location.pathname.includes("/dashboard/hr")
+                ? <AnalyticsHR darkMode={darkMode}/>
+                : <AnalyticsAdmin darkMode={darkMode}/>
+                  }
+                  />
+    
           <Route path="support" element={<SupportChats />} />
           <Route path="feedbacks" element={<Feedbacks />} />
 
@@ -80,9 +79,6 @@ function App() {
           {/* shared */}
           <Route path="settings" element={<Settings />} />
           <Route path="overview" element={<Overview />} />
-
-          
-        
         </Route>
       </Routes>
       {!hideChatbot && <ChatBot darkMode={darkMode} />}

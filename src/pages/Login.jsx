@@ -46,6 +46,7 @@ export default function Login({ darkMode, setDarkMode }) {
     const response = await API.post("/login", {
       email,
       password,
+      role
     });
 
     // Save JWT
@@ -273,7 +274,7 @@ const handleGoogleLogin = async () => {
 >
               Don't have an account?
               <Link
-                to="/register"
+                to={`/register/${role}`}
                 className="text-blue-600 font-semibold ml-2 hover:underline"
               >
                 Register

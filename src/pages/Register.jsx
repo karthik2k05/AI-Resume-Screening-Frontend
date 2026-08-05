@@ -42,10 +42,11 @@ export default function Register({ darkMode , setDarkMode }) {
     name,
     email,
     password,
+    role,
   });
 
   alert(response.data.message);
-  navigate("/login/candidate");
+  navigate(`/login/${role}`);
 
   // Clear the form
   setName("");
@@ -315,7 +316,7 @@ export default function Register({ darkMode , setDarkMode }) {
 >
               Already have an account?
               <Link
-                to="/login/candidate"
+                to={`/login/${role}`}
                 className="text-blue-700 font-semibold ml-2 hover:underline"
               >
                 Login

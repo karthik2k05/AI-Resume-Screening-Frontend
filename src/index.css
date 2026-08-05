@@ -82,3 +82,25 @@ body{
     opacity:1;
   }
 }
+@keyframes placeholderScroll {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.animate-placeholder-scroll {
+  animation: placeholderScroll 2.2s ease-in-out;
+}

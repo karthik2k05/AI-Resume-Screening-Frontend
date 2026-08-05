@@ -92,6 +92,22 @@ const [dbResults, setDbResults] = useState({
   messages: [],
 });
 
+// --- Search bar UI-only additions (scrolling placeholder) ---
+const [isSearchFocused, setIsSearchFocused] = useState(false);
+const [placeholderIndex, setPlaceholderIndex] = useState(0);
+
+const placeholderPhrases = isCandidate
+  ? ["Search jobs...", "Search applications...", "Search your messages...", "Search support tickets..."]
+  : ["Search candidates...", "Search jobs...", "Search tickets...", "Search messages..."];
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setPlaceholderIndex((prev) => (prev + 1) % placeholderPhrases.length);
+  }, 2200);
+  return () => clearInterval(interval);
+}, [placeholderPhrases.length]);
+// --- end search bar UI-only additions ---
+
 const filteredResults = useMemo(() => {
   if (!searchQuery.trim()) return [];
 
@@ -150,23 +166,37 @@ const filteredResults = useMemo(() => {
 
       <div className="flex-1 min-w-0">
         <div
-          className={`relative hidden sm:block flex items-center gap-2 rounded-lg border px-3 py-2 ${
-            darkMode ? "bg-slate-900 border-slate-800" : "bg-slate-50 border-slate-200"
+          className={`relative hidden sm:flex items-center gap-2 rounded-xl border px-3 py-2.5 transition-all duration-200 focus-within:shadow-sm ${
+            darkMode
+              ? "bg-slate-900 border-slate-800 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20"
+              : "bg-slate-50 border-slate-200 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/10"
           }`}
         >
           <Search size={16} className={darkMode ? "text-slate-500" : "text-slate-400"} />
-          <input
-            type="text"
-            value={searchQuery}
-            onFocus={() => setShowResults(true)}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={
-              isCandidate
-                ? "Search jobs, applications..."
-                : "Search candidates, jobs..."
-          }
-          className="w-full bg-transparent outline-none text-sm placeholder:text-slate-400"
-        />
+
+          <div className="relative flex-1 h-5">
+            <input
+              type="text"
+              value={searchQuery}
+              onFocus={() => {
+                setShowResults(true);
+                setIsSearchFocused(true);
+              }}
+              onBlur={() => setIsSearchFocused(false)}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="absolute inset-0 w-full bg-transparent outline-none text-sm"
+            />
+
+            {!searchQuery && !isSearchFocused && (
+              <div
+                key={placeholderIndex}
+                className="absolute inset-0 flex items-center text-sm text-slate-400 pointer-events-none animate-placeholder-scroll"
+              >
+                {placeholderPhrases[placeholderIndex]}
+              </div>
+            )}
+          </div>
+
           {searchQuery && (
             <button onClick={() => setSearchQuery("")} aria-label="Clear search" className="shrink-0">
               <X size={15} className={darkMode ? "text-slate-500" : "text-slate-400"} />
@@ -174,7 +204,11 @@ const filteredResults = useMemo(() => {
           )}
         </div>
       </div>
-      {showResults && (
+      {showResults && (filteredResults.length > 0 ||
+  dbResults.users.length > 0 ||
+  dbResults.jobs.length > 0 ||
+  dbResults.tickets.length > 0 ||
+  dbResults.messages.length > 0) && (
   <div
     className={`absolute top-full mt-3 w-full rounded-lg shadow-lg border z-50 overflow-hidden ${
       darkMode
