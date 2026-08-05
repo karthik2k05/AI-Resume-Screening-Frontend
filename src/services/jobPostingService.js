@@ -3,7 +3,6 @@ console.log(import.meta.env.VITE_API_URL);
 const API = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/api/admin/job-postings`,
 });
-
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
