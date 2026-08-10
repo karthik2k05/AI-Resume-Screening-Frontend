@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link,useNavigate,useParams } from "react-router-dom";
 import API from "../api/authApi";
 import {
@@ -14,6 +14,11 @@ import {
 export default function Register() {
   const navigate = useNavigate();
   const { role } = useParams();
+  useEffect(() => {
+  if (role === "admin") {
+    navigate("/login/admin", { replace: true });
+  }
+}, [role, navigate]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 

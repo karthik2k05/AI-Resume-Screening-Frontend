@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { CreditCard } from "lucide-react";
 import {
   LayoutDashboard,
   Users,
@@ -22,6 +23,12 @@ function navFor(role) {
       { label: "Overview", icon: LayoutDashboard, to: base, end: true },
       { label: "My Applications", icon: FileText, to: `${base}/applications` },
       { label: "Job Matches", icon: Briefcase, to: `${base}/matches` },
+       {
+  label: "Subscription Plans",
+  icon: CreditCard,
+  to: `${base}/subscription`,
+},
+    
       { label: "Settings", icon: Settings, to: `${base}/settings` },
     ];
   }
@@ -42,10 +49,14 @@ function navFor(role) {
 if (role === "hr") {
   return [
     { label: "Overview", icon: LayoutDashboard, to: base, end: true },
-    { label: "Candidates", icon: Users, to: `${base}/candidates` },
     { label: "Resume Screening", icon: ScanLine, to: `${base}/screening` },
     { label: "Job Postings", icon: Briefcase, to: `${base}/jobs` },
     { label: "Analytics", icon: ChartColumn, to: `${base}/analytics` },
+    {
+  label: "Subscription Plans",
+  icon: CreditCard,
+  to: `${base}/subscription`,
+},
     { label: "Settings", icon: Settings, to: `${base}/settings` },
   ];
 }

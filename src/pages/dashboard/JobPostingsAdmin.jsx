@@ -11,7 +11,7 @@ import {
   deleteJobPosting,
 } from "../../services/jobPostingService";
 
-export default function JobPostings() {
+export default function JobPostingsAdmin() {
   const { darkMode, searchQuery,postings, setPostings } = useOutletContext();
   const [showNewJob, setShowNewJob] = useState(false);
   const [newJobDescription, setNewJobDescription] = useState("");  
