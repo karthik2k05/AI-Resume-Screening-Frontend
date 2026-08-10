@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import API from "../api/authApi";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
@@ -11,7 +11,6 @@ import {
   FaEyeSlash,
   FaArrowLeft,
 } from "react-icons/fa";
-import { useNavigate, useParams } from "react-router-dom";
 const ROLE_LABELS = {
   admin: "Admin",
   hr: "HR",
@@ -21,7 +20,11 @@ const ROLE_LABELS = {
 export default function Login() {
 
   const navigate = useNavigate();
+
   const { role } = useParams();
+  const location = useLocation();
+
+const selectedPlan = location.state?.selectedPlan || null;
   
   const roleLabel = ROLE_LABELS[role] || "Candidate";
 
@@ -53,14 +56,27 @@ export default function Login() {
 
     // Save JWT
     localStorage.setItem("token", response.data.token);
-    localStorage.setItem(
+localStorage.setItem(
   "user",
   JSON.stringify(response.data.user)
 );
-     alert("Login Successful");
 
-    navigate(`/dashboard/${role || "candidate"}`);
-    alert(response.data.message);
+alert("Login Successful");
+
+if (
+  selectedPlan &&
+  selectedPlan !== "Free Trial"
+) {
+  navigate(`/dashboard/${role}/subscription`, {
+    state: {
+      selectedPlan,
+    },
+  });
+} else {
+  navigate(`/dashboard/${role || "candidate"}`);
+}
+
+alert(response.data.message);
 
   } catch (error) {
     alert(
@@ -87,13 +103,25 @@ const handleGoogleLogin = async () => {
     console.log(response.data);
 
     localStorage.setItem("token", response.data.token);
-    localStorage.setItem(
+localStorage.setItem(
   "user",
   JSON.stringify(response.data.user)
 );
-    navigate(`/dashboard/${role || "candidate"}`);
 
-    alert(response.data.message);
+if (
+  selectedPlan &&
+  selectedPlan !== "Free Trial"
+) {
+  navigate(`/dashboard/${role}/subscription`, {
+    state: {
+      selectedPlan,
+    },
+  });
+} else {
+  navigate(`/dashboard/${role || "candidate"}`);
+}
+
+alert(response.data.message);
 
   } catch (error) {
     console.error(error);
@@ -225,24 +253,27 @@ const handleGoogleLogin = async () => {
             </button>
 
             {/* REGISTER */}
-            <p className="text-center mt-5 text-sm text-gray-600">
-              Don't have an account?
-              <Link
-                to={`/register/${role}`}
-                className="text-blue-600 font-semibold ml-2 hover:underline"
-              >
-                Register
-              </Link>
-              <br />
-              <br />
-              <button
-  onClick={handleGoogleLogin}
-  className="w-full h-10 mt-5 rounded-lg bg-gradient-to-r from-slate-900 to-blue-700 text-white text-sm font-semibold hover:opacity-95 transition"
->
-  <FaGoogle className="text-red-500" />
-  Continue with Google
-</button>
-            </p>
+         <div className="text-center mt-5 text-sm text-gray-600">
+  {role !== "admin" && (
+    <p>
+      Don't have an account?
+      <Link
+        to={`/register/${role}`}
+        className="text-blue-600 font-semibold ml-2 hover:underline"
+      >
+        Register
+      </Link>
+    </p>
+  )}
+
+  <button
+    onClick={handleGoogleLogin}
+    className="w-full h-10 mt-5 rounded-lg bg-gradient-to-r from-slate-900 to-blue-700 text-white text-sm font-semibold hover:opacity-95 transition flex items-center justify-center gap-2"
+  >
+    <FaGoogle className="text-red-500" />
+    Continue with Google
+  </button>
+</div>
           </div>
         </div>
       </div>

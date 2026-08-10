@@ -1,22 +1,24 @@
 import { motion } from "framer-motion";
-
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import RoleSelectionModal from "./RoleSelectionModal";
 const plans = [
   {
     title: "Free Trial",
     price: "₹0",
-    period: "7 Days",
+    period: "Limited",
     features: [
-      "50 Resume Uploads",
-      "Basic AI Screening",
-      "Email Support",
+      "10 Resume Uploads",
+      "AI Screening",
+      "Job Matching",
     ],
     button: "Start Free",
     popular: false,
   },
   {
     title: "Professional",
-    price: "₹999",
-    period: "/ Month",
+    price: "₹499",
+    period: " Monthly",
     features: [
       "Unlimited Screening",
       "AI Ranking",
@@ -28,19 +30,36 @@ const plans = [
   },
   {
     title: "Enterprise",
-    price: "Custom",
-    period: "",
+    price: "₹4999",
+    period: " Yearly",
     features: [
-      "Unlimited Everything",
-      "API Integration",
+      "Unlimited Screening",
+      "AI Ranking",
+      "Analytics Dashboard",
       "Dedicated Support",
+      
     ],
-    button: "Contact Sales",
+    button: "Subscribe",
     popular: false,
   },
 ];
 
-export default function Pricing({ darkMode }) {
+export default function Pricing({
+  darkMode,
+  dashboard = false,
+  currentPlan = "FREE",
+  onSubscribe = () => {},
+}) {
+   const navigate = useNavigate();
+
+  const [showRoleModal, setShowRoleModal] = useState(false);
+
+  const [selectedPlan, setSelectedPlan] = useState("");
+
+  const handlePlanClick = (plan) => {
+    setSelectedPlan(plan);
+    setShowRoleModal(true);
+  };
   return (
     <section id="pricing" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
 
@@ -119,12 +138,44 @@ export default function Pricing({ darkMode }) {
               ))}
 
             </ul>
-
-            <button className="w-full mt-10 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition">
-
-              {plan.button}
-
-            </button>
+          <button
+  onClick={() => {
+    if (dashboard) {
+      onSubscribe(plan);
+    } else {
+      handlePlanClick(plan.title);
+    }
+  }}
+  disabled={
+    dashboard &&
+    (
+      (currentPlan === "FREE" && plan.title === "Free Trial") ||
+      (currentPlan === "MONTHLY" && plan.title === "Professional") ||
+      (currentPlan === "YEARLY" && plan.title === "Enterprise")
+    )
+  }
+  className={`w-full mt-10 py-3 rounded-lg transition
+    ${
+      dashboard &&
+      (
+        (currentPlan === "FREE" && plan.title === "Free Trial") ||
+        (currentPlan === "MONTHLY" && plan.title === "Professional") ||
+        (currentPlan === "YEARLY" && plan.title === "Enterprise")
+      )
+        ? "bg-green-600 cursor-not-allowed"
+        : "bg-blue-600 hover:bg-blue-700"
+    }
+    text-white`}
+>
+  {dashboard &&
+  (
+    (currentPlan === "FREE" && plan.title === "Free Trial") ||
+    (currentPlan === "MONTHLY" && plan.title === "Professional") ||
+    (currentPlan === "YEARLY" && plan.title === "Enterprise")
+  )
+    ? "Current Plan"
+    : plan.button}
+</button>
 
           </motion.div>
 
@@ -132,6 +183,12 @@ export default function Pricing({ darkMode }) {
 
       </div>
 
+<RoleSelectionModal
+  open={showRoleModal}
+  selectedPlan={selectedPlan}
+  onClose={() => setShowRoleModal(false)}
+  darkMode={darkMode}
+/>
     </section>
   );
 }
