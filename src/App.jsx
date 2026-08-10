@@ -3,6 +3,8 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import LandingPage from "./LandingPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import Overview from "./pages/dashboard/Overview";
 
@@ -67,6 +69,16 @@ function App() {
   path="/register/:role"
   element={
     <Register
+      darkMode={darkMode}
+      setDarkMode={setDarkMode}
+    />
+  }
+/>
+
+<Route
+  path="/forgot-password"
+  element={
+    <ForgotPassword
       darkMode={darkMode}
       setDarkMode={setDarkMode}
     />
