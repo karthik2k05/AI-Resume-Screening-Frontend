@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import API from "../api/authApi";
-import { signInWithPopup } from "firebase/auth";
+import {
+  signInWithPopup,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 import {
   FaEnvelope,
@@ -11,226 +15,264 @@ import {
   FaEyeSlash,
   FaArrowLeft,
 } from "react-icons/fa";
+import { Moon, Sun } from "lucide-react";
+
 const ROLE_LABELS = {
   admin: "Admin",
   hr: "HR",
   candidate: "Candidate",
 };
 
-export default function Login() {
-
+export default function Login({ darkMode, setDarkMode }) {
   const navigate = useNavigate();
-
   const { role } = useParams();
   const location = useLocation();
+  const selectedPlan = location.state?.selectedPlan || null;
 
-const selectedPlan = location.state?.selectedPlan || null;
-  
   const roleLabel = ROLE_LABELS[role] || "Candidate";
 
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
-  
-  
-  
 
   const handleLogin = async () => {
-  if (!email || !password) {
-    alert("Please enter your email and password.");
-    return;
-  }
+    if (!email || !password) {
+      alert("Please enter your email and password.");
+      return;
+    }
 
-  if (!rememberMe) {
-    alert("Please select 'Remember me' to continue.");
-    return;
-  }
+    if (!rememberMe) {
+      alert("Please select 'Remember me' to continue.");
+      return;
+    }
 
-  try {
-    const response = await API.post("/login", {
-      email,
-      password,
-      role
-    });
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
-    // Save JWT
-    localStorage.setItem("token", response.data.token);
-localStorage.setItem(
-  "user",
-  JSON.stringify(response.data.user)
-);
+      const firebaseUser = userCredential.user;
+      const idToken = await firebaseUser.getIdToken();
 
-alert("Login Successful");
+      const response = await API.post("/firebase-login", {
+        idToken,
+      });
 
-if (
-  selectedPlan &&
-  selectedPlan !== "Free Trial"
-) {
-  navigate(`/dashboard/${role}/subscription`, {
-    state: {
-      selectedPlan,
-    },
-  });
-} else {
-  navigate(`/dashboard/${role || "candidate"}`);
-}
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify(response.data.user)
+      );
 
-alert(response.data.message);
+      alert("Login Successful");
 
-  } catch (error) {
-    alert(
-      error.response?.data?.message || "Login Failed"
-    );
-  }
-};
-const handleGoogleLogin = async () => {
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
+      if (selectedPlan && selectedPlan !== "Free Trial") {
+        navigate(`/dashboard/${role}/subscription`, {
+          state: {
+            selectedPlan,
+          },
+        });
+      } else {
+        navigate(`/dashboard/${role || "candidate"}`);
+      }
+    } catch (error) {
+      console.error(error);
 
-    const user = result.user;
+      if (
+        error.code === "auth/invalid-credential" ||
+        error.code === "auth/wrong-password"
+      ) {
+        alert("Invalid email or password.");
+      } else if (error.code === "auth/user-not-found") {
+        alert("User not found.");
+      } else if (error.code === "auth/invalid-email") {
+        alert("Invalid email.");
+      } else {
+        alert(error.response?.data?.message || "Login Failed");
+      }
+    }
+  };
 
-    // Get Firebase ID Token
-    const idToken = await user.getIdToken();
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const idToken = await user.getIdToken();
 
-    console.log("Firebase ID Token:", idToken);
+      const response = await API.post("/google-login", {
+        idToken,
+      });
 
-    // Send token to backend
-    const response = await API.post("/google-login", {
-      idToken,
-    });
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify(response.data.user)
+      );
 
-    console.log(response.data);
+      if (selectedPlan && selectedPlan !== "Free Trial") {
+        navigate(`/dashboard/${role}/subscription`, {
+          state: {
+            selectedPlan,
+          },
+        });
+      } else {
+        navigate(`/dashboard/${role || "candidate"}`);
+      }
 
-    localStorage.setItem("token", response.data.token);
-localStorage.setItem(
-  "user",
-  JSON.stringify(response.data.user)
-);
+      alert(response.data.message);
+    } catch (error) {
+      console.error(error);
 
-if (
-  selectedPlan &&
-  selectedPlan !== "Free Trial"
-) {
-  navigate(`/dashboard/${role}/subscription`, {
-    state: {
-      selectedPlan,
-    },
-  });
-} else {
-  navigate(`/dashboard/${role || "candidate"}`);
-}
-
-alert(response.data.message);
-
-  } catch (error) {
-    console.error(error);
-
-    alert(
-      error.response?.data?.message ||
-      error.message ||
-      "Google Login Failed"
-    );
-  }
-};
+      alert(
+        error.response?.data?.message ||
+        error.message ||
+        "Google Login Failed"
+      );
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-8 bg-gradient-to-br from-slate-100 via-blue-100 to-indigo-200 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute top-0 left-0 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl"></div>
-      <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-cyan-400/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+    <div
+      className={`relative min-h-screen flex items-center justify-center px-6 py-8 ${
+        darkMode
+          ? "bg-[#020617]"
+          : "bg-slate-200"
+      }`}
+    >
+      <button
+        onClick={() => {
+          const newTheme = !darkMode;
+          setDarkMode(newTheme);
+          localStorage.setItem("theme", newTheme ? "dark" : "light");
+        }}
+        aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+        className={`absolute top-6 right-6 z-20 flex items-center justify-center w-10 h-10 rounded-lg transition ${
+          darkMode
+            ? "bg-slate-800 hover:bg-slate-700"
+            : "bg-slate-200 hover:bg-slate-300"
+        }`}
+      >
+        {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+      </button>
+
       <Link
         to="/"
-        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition"
+        className={`absolute top-4 left-4 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-2 text-sm font-medium transition-colors ${
+          darkMode
+            ? "text-slate-300 hover:text-white"
+            : "text-slate-700 hover:text-slate-900"
+        }`}
       >
-        <FaArrowLeft size={14} />
-        Back to home
+        <FaArrowLeft className="text-base" />
+        <span>Back to Home</span>
       </Link>
 
-      <div className="relative z-10 w-full max-w-4xl h-[600px] bg-white rounded-[24px] overflow-hidden shadow-2xl grid md:grid-cols-[1fr_1fr]">
-        {/* LEFT PANEL */}
-        <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950 text-white p-8 flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold">Welcome Back!</h1>
-            <p className="mt-5 text-lg leading-8 text-slate-200 max-w-sm mx-auto">
-              Upload your resume and let AI analyze your skills, experience, and
-              qualifications to connect you with the right career opportunities.
-            </p>
-            <button className="mt-8 px-8 py-3 rounded-lg bg-white text-slate-900 font-semibold hover:bg-slate-100 transition">
-              Learn More
-            </button>
-
-            <div className="mt-10 space-y-4 text-left max-w-xs mx-auto">
-              <div className="flex items-center gap-3">
-                <span className="text-green-400">✔</span>
-                <p>AI-Powered Resume Analysis</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-green-400">✔</span>
-                <p>Instant Skill Matching</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-green-400">✔</span>
-                <p>Secure & Reliable Platform</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT PANEL */}
-        <div className="p-12 flex items-center">
+      <div
+        className={`relative z-10 w-full max-w-md rounded-2xl shadow-xl ${
+          darkMode
+            ? "bg-slate-900 border border-slate-700"
+            : "bg-white border border-slate-200"
+        }`}
+      >
+        <div className="p-8 flex items-center">
           <div className="w-full">
-            <h2 className="text-3xl font-bold text-gray-800 text-center">
-              LOGIN
+            <h2
+              className={`text-3xl font-bold text-center ${
+                darkMode ? "text-white" : "text-gray-800"
+              }`}
+            >
+              Welcome Back 👋
             </h2>
-            <p className="text-md text-gray-500 text-center mt-2 mb-6">
-              Login to your account
+
+            <p
+              className={`text-center mt-2 mb-8 text-sm ${
+                darkMode ? "text-slate-400" : "text-gray-500"
+              }`}
+            >
+              Sign in to access your ResumeIQ workspace
             </p>
 
-            {/* EMAIL */}
             <div className="mb-5">
-              <label className="font-medium text-gray-700">Email</label>
-              <div className="mt-2 flex items-center h-10 rounded-lg border border-gray-300 bg-gray-50 px-3 focus-within:border-blue-700 transition">
-                <FaEnvelope className="text-blue-600 mr-3" />
+              <label
+                className={`text-sm font-medium ${
+                  darkMode ? "text-slate-200" : "text-gray-700"
+                }`}
+              >
+                Email
+              </label>
+
+              <div
+                className={`mt-2 flex items-center h-12 rounded-xl border px-4 ${
+                  darkMode
+                    ? "bg-slate-800/70 border-slate-700 focus-within:border-blue-500"
+                    : "bg-gray-50 border-gray-300"
+                }`}
+              >
+                <FaEnvelope className="text-blue-500 mr-3" />
                 <input
                   type="email"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm text-black"
+                  className={`w-full outline-none text-sm ${
+                    darkMode
+                      ? "bg-transparent text-white placeholder-slate-400"
+                      : "bg-transparent text-black placeholder-gray-500"
+                  }`}
                 />
               </div>
             </div>
 
-            {/* PASSWORD */}
             <div>
-              <label className="font-medium text-gray-700">Password</label>
-              <div className="mt-2 flex items-center h-10 rounded-lg border border-gray-300 bg-gray-50 px-3 focus-within:border-blue-700 transition">
-                <FaLock className="text-blue-700 mr-2 text-sm" />
+              <label
+                className={`text-sm font-medium ${
+                  darkMode ? "text-slate-200" : "text-gray-700"
+                }`}
+              >
+                Password
+              </label>
+
+              <div
+                className={`mt-2 flex items-center h-12 rounded-xl border px-4 ${
+                  darkMode
+                    ? "bg-slate-800/70 border-slate-700 focus-within:border-blue-500"
+                    : "bg-gray-50 border-gray-300"
+                }`}
+              >
+                <FaLock className="text-blue-500 mr-3" />
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-transparent outline-none text-sm text-black"
+                  className={`w-full outline-none text-sm ${
+                    darkMode
+                      ? "bg-transparent text-white placeholder-slate-400"
+                      : "bg-transparent text-black placeholder-gray-500"
+                  }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <FaEyeSlash className="text-gray-500" />
+                    <FaEyeSlash className="text-slate-400" />
                   ) : (
-                    <FaEye className="text-gray-500" />
+                    <FaEye className="text-slate-400" />
                   )}
                 </button>
               </div>
             </div>
 
-            {/* REMEMBER */}
-            <div className="flex justify-between items-center mt-4 text-sm">
-              <label className="flex items-center gap-2 text-gray-600">
+            <div className="flex justify-between items-center mt-5">
+              <label
+                className={`flex items-center gap-2 text-sm ${
+                  darkMode ? "text-slate-300" : "text-gray-600"
+                }`}
+              >
                 <input
                   type="checkbox"
                   checked={rememberMe}
@@ -239,45 +281,85 @@ alert(response.data.message);
                 />
                 Remember me
               </label>
-              <a href="#" className="text-blue-600 hover:underline">
+
+              <Link
+                to="/forgot-password"
+                className="text-sm text-blue-500 hover:underline"
+              >
                 Forgot Password?
-              </a>
+              </Link>
             </div>
 
-            {/* LOGIN BUTTON */}
             <button
               onClick={handleLogin}
-              className="w-full h-10 mt-5 rounded-lg bg-gradient-to-r from-slate-900 to-blue-700 text-white text-sm font-semibold hover:opacity-95 transition"
+              className="
+                w-full
+                h-12
+                mt-7
+                rounded-xl
+                bg-gradient-to-r
+                from-blue-600
+                to-indigo-600
+                text-white
+                font-semibold
+                shadow-lg
+                shadow-blue-900/30
+                hover:opacity-90
+                transition
+              "
             >
-              Login
+              Sign In
             </button>
 
-            {/* REGISTER */}
-         <div className="text-center mt-5 text-sm text-gray-600">
-  {role !== "admin" && (
-    <p>
-      Don't have an account?
-      <Link
-        to={`/register/${role}`}
-        className="text-blue-600 font-semibold ml-2 hover:underline"
-      >
-        Register
-      </Link>
-    </p>
-  )}
+            <div className="flex items-center gap-3 my-4">
+              <div
+                className={`flex-1 h-px ${
+                  darkMode ? "bg-slate-700" : "bg-gray-300"
+                }`}
+              ></div>
+              <span
+                className={`text-xs ${
+                  darkMode ? "text-slate-400" : "text-gray-500"
+                }`}
+              >
+                OR
+              </span>
+              <div
+                className={`flex-1 h-px ${
+                  darkMode ? "bg-slate-700" : "bg-gray-300"
+                }`}
+              ></div>
+            </div>
 
-  <button
-    onClick={handleGoogleLogin}
-    className="w-full h-10 mt-5 rounded-lg bg-gradient-to-r from-slate-900 to-blue-700 text-white text-sm font-semibold hover:opacity-95 transition flex items-center justify-center gap-2"
-  >
-    <FaGoogle className="text-red-500" />
-    Continue with Google
-  </button>
-</div>
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              className={`w-full h-12 mt-4 rounded-xl flex items-center justify-center gap-3 font-medium border ${
+                darkMode
+                  ? "bg-slate-800/70 border-slate-700 text-white"
+                  : "bg-gray-50 border-gray-300 text-gray-700"
+              }`}
+            >
+              <FaGoogle className="text-red-500" />
+              <span>Continue with Google</span>
+            </button>
+
+            <div className="text-center mt-5 text-sm text-gray-600">
+              {role !== "admin" && (
+                <p>
+                  Don't have an account?
+                  <Link
+                    to={`/register/${role}`}
+                    className="text-blue-600 font-semibold ml-2 hover:underline"
+                  >
+                    Register
+                  </Link>
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
-      
     </div>
   );
 }
