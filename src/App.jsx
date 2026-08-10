@@ -9,7 +9,7 @@ import DashboardLayout from "./components/dashboard/DashboardLayout";
 import Overview from "./pages/dashboard/Overview";
 import CandidatesAdmin from "./pages/dashboard/CandidatesAdmin";
 import JobPostingsAdmin from "./pages/dashboard/JobPostingsAdmin";
-import JobPostingsHR from "./pages/dashboard/JobPostingsHR";
+import JobPostingsHR from "./pages/dashboard/JobPostingsHr";
 import AnalyticsAdmin from "./pages/dashboard/AnalyticsAdmin";
 import AnalyticsHR from "./pages/dashboard/AnalyticsHR";
 import ResumeScreening from "./pages/dashboard/ResumeScreening";
@@ -109,7 +109,7 @@ function App() {
   path="jobs"
   element={
     location.pathname.includes("/dashboard/hr")
-      ? <JobPostingsHR />
+      ? <JobPostingsHr />
       : <JobPostingsAdmin />
   }
 />
