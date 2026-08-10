@@ -7,15 +7,11 @@ import ForgotPassword from "./pages/ForgotPassword";
 
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import Overview from "./pages/dashboard/Overview";
-
 import CandidatesAdmin from "./pages/dashboard/CandidatesAdmin";
-import CandidatesHR from "./pages/dashboard/CandidatesHR";
-
-import JobPostings from "./pages/dashboard/JobPostings";
-
+import JobPostingsAdmin from "./pages/dashboard/JobPostingsAdmin";
+import JobPostingsHR from "./pages/dashboard/JobPostingsHR";
 import AnalyticsAdmin from "./pages/dashboard/AnalyticsAdmin";
 import AnalyticsHR from "./pages/dashboard/AnalyticsHR";
-
 import ResumeScreening from "./pages/dashboard/ResumeScreening";
 import Applications from "./pages/dashboard/Applications";
 import JobMatches from "./pages/dashboard/JobMatches";
@@ -23,7 +19,8 @@ import Settings from "./pages/dashboard/Settings";
 import SupportChats from "./pages/dashboard/SupportChats";
 import Feedbacks from "./pages/dashboard/Feedbacks";
 import ChatBot from "./chatbot/ChatBot";
-
+import SubscriptionPlans from "./pages/dashboard/SubscriptionPlans";
+//import Payment from "./pages/dashboard/Payment";
 function App() {
   const [darkMode, setDarkMode] = useState(false);
 
@@ -62,10 +59,16 @@ function App() {
         />
 
         <Route
-          path="/register"
-          element={<Register darkMode={darkMode} setDarkMode={setDarkMode} />}
-        />
-        <Route
+  path="/register"
+  element={
+    <Register
+      darkMode={darkMode}
+      setDarkMode={setDarkMode}
+    />
+  }
+/>
+
+<Route
   path="/register/:role"
   element={
     <Register
@@ -98,15 +101,18 @@ function App() {
 
           {/* admin / hr */}
           <Route
-            path="candidates"
-            element={
-              location.pathname.includes("/dashboard/hr")
-                ? <CandidatesHR />
-                : <CandidatesAdmin />
-            }
-          />
+  path="candidates"
+  element={<CandidatesAdmin />}
+/>
 
-          <Route path="jobs" element={<JobPostings />} />
+          <Route
+  path="jobs"
+  element={
+    location.pathname.includes("/dashboard/hr")
+      ? <JobPostingsHR />
+      : <JobPostingsAdmin />
+  }
+/>
           <Route path="screening" element={<ResumeScreening />} />
 
           <Route
@@ -120,11 +126,15 @@ function App() {
 
           <Route path="support" element={<SupportChats />} />
           <Route path="feedbacks" element={<Feedbacks />} />
-
+                <Route
+  path="subscription"
+  element={<SubscriptionPlans />}
+/>    
           {/* candidate */}
           <Route path="applications" element={<Applications />} />
           <Route path="matches" element={<JobMatches />} />
 
+          {/*<Route path="payment"element={<Payment />}/>*/}
           {/* shared */}
           <Route path="settings" element={<Settings />} />
           <Route path="overview" element={<Overview />} />
