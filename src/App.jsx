@@ -11,6 +11,7 @@ import JobPostingsHR from "./pages/dashboard/JobPostingsHR";
 import AnalyticsAdmin from "./pages/dashboard/AnalyticsAdmin";
 import AnalyticsHR from "./pages/dashboard/AnalyticsHR";
 import ResumeScreening from "./pages/dashboard/ResumeScreening";
+import ForgotPassword from "./pages/ForgotPassword";
 import Applications from "./pages/dashboard/Applications";
 import JobMatches from "./pages/dashboard/JobMatches";
 import Settings from "./pages/dashboard/Settings";
@@ -70,6 +71,15 @@ function App() {
   path="/register/:role"
   element={
     <Register
+      darkMode={darkMode}
+      setDarkMode={setDarkMode}
+    />
+  }
+/>
+<Route
+  path="/forgot-password"
+  element={
+    <ForgotPassword
       darkMode={darkMode}
       setDarkMode={setDarkMode}
     />
