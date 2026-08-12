@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import API from "../api/authApi";
 import {
   signInWithPopup,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
 } from "firebase/auth";
 
@@ -40,8 +41,6 @@ const selectedPlan = location.state?.selectedPlan || null;
   const [rememberMe, setRememberMe] = useState(false);
   
   
-  
-
   const handleLogin = async () => {
   if (!email || !password) {
     alert("Please enter your email and password.");
@@ -53,46 +52,54 @@ const selectedPlan = location.state?.selectedPlan || null;
     return;
   }
 
+  const requestedRole = role?.toLowerCase();
+
+  if (!["candidate", "hr", "admin"].includes(requestedRole)) {
+    alert("Invalid login role.");
+    return;
+  }
+
   try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password,
-        
-      );
-  
- const firebaseUser = userCredential.user;
-      const idToken = await firebaseUser.getIdToken();
+  // Firebase email/password authentication
+  const userCredential = await signInWithEmailAndPassword(
+    auth,
+    email,
+    password
+  );
 
-      const response = await API.post("/firebase-login", {
-        idToken,
-      });
+  const firebaseUser = userCredential.user;
 
-    // Save JWT
+  // Get Firebase ID token
+  const idToken = await firebaseUser.getIdToken();
+
+  // Send Firebase token to your backend
+  const response = await API.post("/firebase-login", {
+  idToken,
+  role: requestedRole,
+});
+
+    // Save your backend JWT
     localStorage.setItem("token", response.data.token);
-localStorage.setItem(
-  "user",
-  JSON.stringify(response.data.user)
-);
 
-alert(response.data.message || "Login Successful");
+    localStorage.setItem(
+      "user",
+      JSON.stringify(response.data.user)
+    );
 
-if (
-  selectedPlan &&
-  selectedPlan !== "Free Trial"
-) {
-  navigate(`/dashboard/${role}/subscription`, {
-    state: {
-      selectedPlan,
-    },
-  });
-} else {
-  navigate(`/dashboard/${role || "candidate"}`);
-}
+    alert(response.data.message || "Login Successful");
 
+    if (selectedPlan && selectedPlan !== "Free Trial") {
+      navigate(`/dashboard/${requestedRole}/subscription`, {
+        state: {
+          selectedPlan,
+        },
+      });
+    } else {
+      navigate(`/dashboard/${requestedRole}`);
+    }
 
   } catch (error) {
-      console.error(error);
+    console.error(error);
 
       if (
         error.code === "auth/invalid-credential" ||
@@ -107,8 +114,9 @@ if (
         alert(error.response?.data?.message || "Login Failed");
       }
     }
-  };
+};
 
+ 
 
 //google login
 const handleGoogleLogin = async () => {
