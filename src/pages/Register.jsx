@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link,useNavigate,useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import API from "../api/authApi";
 import {
   FaUser,
@@ -9,6 +9,9 @@ import {
   FaEye,
   FaEyeSlash,
   FaArrowLeft,
+  FaRobot,
+  FaChartBar,
+  FaUserCheck,
 } from "react-icons/fa";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
@@ -17,10 +20,11 @@ export default function Register({ darkMode }) {
   const navigate = useNavigate();
   const { role } = useParams();
   useEffect(() => {
-  if (role === "admin") {
-    navigate("/login/admin", { replace: true });
-  }
-}, [role, navigate]);
+    if (role === "admin") {
+      navigate("/login/admin", { replace: true });
+    }
+  }, [role, navigate]);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -30,64 +34,66 @@ export default function Register({ darkMode }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
 
-  const handleRegister = async () => {
-    if (!name || !email || !password || !confirmPassword) {
-      alert("Please fill all the fields.");
-      return;
-    }
+ const handleRegister = async () => {
+  const requestedRole = role?.toLowerCase();
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match.");
-      return;
-    }
+  // Only Candidate and HR can register
+  if (!["candidate", "hr"].includes(requestedRole)) {
+    alert("Invalid registration role.");
+    return;
+  }
 
-    if (!acceptTerms) {
-      alert("Please accept the Terms & Conditions.");
-      return;
-    }
+  if (!name || !email || !password || !confirmPassword) {
+    alert("Please fill all the fields.");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    alert("Passwords do not match.");
+    return;
+  }
+
+  if (!acceptTerms) {
+    alert("Please accept the Terms & Conditions.");
+    return;
+  }
+
+  // keep the rest of your existing code...
 
     try {
+    // Create Firebase account
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
 
-  // Create Firebase account
-  const userCredential = await createUserWithEmailAndPassword(
-    auth,
-    email,
-    password
-  );
+      const firebaseUser = userCredential.user;
 
-  const firebaseUser = userCredential.user;
+      // Save user in PostgreSQL with the selected role
+    const response = await API.post("/register", {
+        name,
+        email,
+        password,
+        firebase_uid: firebaseUser.uid,
+          role: requestedRole,
+      });
 
-  // Save user in PostgreSQL with the selected role
-  const response = await API.post("/register", {
-    name,
-    email,
-    password,
-    firebase_uid: firebaseUser.uid,
-    role,
-  });
+      alert("Registration Successful");
 
-  alert(response.data.message);
+      setName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setAcceptTerms(false);
 
-  navigate(`/login/${role}`);
-
-  // Clear the form
-  setName("");
-  setEmail("");
-  setPassword("");
-  setConfirmPassword("");
-  setAcceptTerms(false);
-
-} catch (error) {
-  console.error(error);
-
-  alert(
-    error.response?.data?.message ||
-    error.message ||
-    "Registration Failed"
-  );
-}
-}; 
-
+      navigate(`/login/${role}`);
+      
+    } catch (error) {
+      console.log(error);
+      alert(error.message || "Registration Failed");
+    }
+  };
  return (
   <div
     className={`relative min-h-screen flex items-center justify-center px-6 py-6 ${
@@ -399,7 +405,7 @@ export default function Register({ darkMode }) {
             Already have an account?
 
             <Link
-              to="/login/candidate"
+                to={`/login/${role}`}
               className="ml-2 text-blue-500 font-semibold hover:underline"
             >
               Login
