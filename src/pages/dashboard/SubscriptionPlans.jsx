@@ -74,134 +74,350 @@ const fetchSubscription = async () => {
 
 }, []);
 const [subscription, setSubscription] = useState(null);
+
+//newly added
+  const isUnlimited = subscription?.uploads_limit === -1;
+
+  const usagePercent =
+    subscription && !isUnlimited && subscription.uploads_limit
+      ? Math.min(100, Math.round((subscription.uploads_used / subscription.uploads_limit) * 100))
+      : 0;
+
+  const remainingUploads = subscription
+    ? isUnlimited
+      ? "∞"
+      : Math.max(0, subscription.uploads_limit - subscription.uploads_used)
+    : "—";
+
   return (
   <div className="max-w-7xl mx-auto">
-   <div
-  className={`rounded-3xl border p-8 mb-16 ${
-    darkMode
-      ? "bg-slate-900 border-slate-700"
-      : "bg-white border-slate-200"
-  }`}
->
-  <div className="flex items-center justify-between">
 
-    <div>
-      <h2
-        className={`text-3xl font-bold ${
-          darkMode ? "text-white" : "text-slate-900"
-        }`}
-      >
-        Current Subscription
-      </h2>
+  {/* ================= CURRENT SUBSCRIPTION ================= */}
+  <div
+    className={`rounded-3xl border overflow-hidden mb-16 shadow-sm ${
+  darkMode
+    ? "bg-slate-900 border-slate-700"
+    : "bg-white border-slate-200"
+}`}
+  >
 
-      <p
-        className={`mt-2 ${
-          darkMode ? "text-slate-400" : "text-slate-600"
-        }`}
-      >
-        Manage your ResumeIQ AI subscription.
-      </p>
+    {/* HEADER */}
+    <div
+      className={`px-8 py-7 border-b ${
+        darkMode
+    ? "bg-slate-900 border-slate-700"
+    : "bg-white border-slate-200"
+      }`}
+    >
+      <div className="flex items-center justify-between">
+
+        <div>
+          <h2
+            className={`text-3xl font-bold ${
+              darkMode ? "text-white" : "text-slate-900"
+            }`}
+          >
+            Current Subscription
+          </h2>
+
+          <p
+            className={`mt-2 text-sm ${
+              darkMode ? "text-slate-400" : "text-slate-500"
+            }`}
+          >
+            Manage your ResumeIQ AI subscription and usage.
+          </p>
+        </div>
+
+        {/* ACTIVE STATUS */}
+        <span
+          className="inline-flex items-center gap-2 px-5 py-2.5
+                     rounded-full bg-green-500/10
+                     text-green-500 border border-green-500/20
+                     text-sm font-semibold"
+        >
+          <span className="w-2 h-2 rounded-full bg-green-500"></span>
+          ACTIVE
+        </span>
+
+      </div>
     </div>
 
-    <span className="px-4 py-2 rounded-full bg-green-500/20 text-green-400 font-semibold">
-      ACTIVE
-    </span>
 
-  </div>
+    {/* SUBSCRIPTION CONTENT */}
+    <div className="p-8">
 
-  <div className="grid md:grid-cols-3 gap-10 mt-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-    {/* PLAN */}
-
-    <div>
-
-      <p className="text-slate-400">
-        Current Plan
-      </p>
-
-      <h3
-        className={`text-4xl font-bold mt-2 ${
-          darkMode ? "text-white" : "text-slate-900"
-        }`}
-      >
-        {subscription?.plan || "FREE"}
-      </h3>
-
-      <span className="inline-block mt-4 px-4 py-1 rounded-full bg-blue-500/20 text-blue-400">
-  {subscription?.plan === "FREE"
-    ? "10 Resume Uploads Included"
-    : "Unlimited Resume Uploads"}
-</span>
-
-    </div>
-
-    {/* UPLOADS */}
-
-    <div>
-
-      <p className="text-slate-400">
-        Upload Usage
-      </p>
-
-      <h3
-        className={`text-4xl font-bold mt-2 ${
-          darkMode ? "text-white" : "text-slate-900"
-        }`}
-      >
-        {subscription?.uploads_used} / {subscription?.uploads_limit}
-      </h3>
-
-      <div className="w-full h-3 rounded-full bg-slate-700 mt-5">
-
+        {/* ================= CURRENT PLAN ================= */}
         <div
-          className="bg-blue-600 h-3 rounded-full"
-          style={{
-width: subscription
-? `${(subscription.uploads_used / subscription.uploads_limit) * 100}%`
-: "0%",
-}}
-        />
+          className={`rounded-2xl border p-6 ${
+            darkMode
+    ? "bg-slate-900 border-slate-700"
+    : "bg-white border-slate-200"
+          }`}
+        >
+
+          <p
+            className={`text-sm font-medium ${
+              darkMode ? "text-slate-400" : "text-slate-500"
+            }`}
+          >
+            Current Plan
+          </p>
+
+          <h3
+            className={`text-4xl font-bold mt-3 ${
+              darkMode ? "text-white" : "text-slate-900"
+            }`}
+          >
+            {subscription?.plan || "FREE"}
+          </h3>
+
+          <div
+            className="inline-flex items-center mt-5 px-4 py-2
+                       rounded-full bg-blue-500/10
+                       text-blue-500 text-sm font-medium"
+          >
+            {subscription?.plan === "FREE"
+              ? "10 Resume Uploads Included"
+              : "Unlimited Resume Uploads"}
+          </div>
+
+        </div>
+
+
+        {/* ================= UPLOAD USAGE ================= */}
+        <div
+          className={`rounded-2xl border p-6 ${
+            darkMode
+    ? "bg-slate-900 border-slate-700"
+    : "bg-white border-slate-200"
+          }`}
+        >
+
+          <div className="flex items-center justify-between">
+
+            <p
+              className={`text-sm font-medium ${
+                darkMode ? "text-slate-400" : "text-slate-500"
+              }`}
+            >
+              Upload Usage
+            </p>
+
+            <span className="text-xs font-semibold text-blue-500">
+              {isUnlimited ? "UNLIMITED" : `${usagePercent}% USED`}
+            </span>
+
+          </div>
+
+          <h3
+            className={`text-4xl font-bold mt-3 ${
+              darkMode ? "text-white" : "text-slate-900"
+            }`}
+          >
+            {isUnlimited
+              ? "Unlimited"
+              : `${subscription?.uploads_used ?? 0} / ${
+                  subscription?.uploads_limit ?? 10
+                }`}
+          </h3>
+
+          {/* PROGRESS BAR */}
+          <div
+            className={`w-full h-3 rounded-full mt-6 overflow-hidden ${
+              darkMode ? "bg-slate-700" : "bg-slate-200"
+            }`}
+          >
+            <div
+              className="h-full bg-blue-600 rounded-full transition-all duration-500"
+              style={{
+                width: isUnlimited ? "100%" : `${usagePercent}%`,
+              }}
+            />
+          </div>
+
+          <p
+            className={`text-sm mt-3 ${
+              darkMode ? "text-slate-400" : "text-slate-500"
+            }`}
+          >
+            {isUnlimited
+              ? "Unlimited plan"
+              : `${usagePercent}% Used`}
+          </p>
+
+        </div>
+
+
+        {/* ================= REMAINING UPLOADS ================= */}
+        <div
+          className={`rounded-2xl border p-6 ${
+            darkMode
+    ? "bg-slate-900 border-slate-700"
+    : "bg-white border-slate-200"
+          }`}
+        >
+
+          <p
+            className={`text-sm font-medium ${
+              darkMode ? "text-slate-400" : "text-slate-500"
+            }`}
+          >
+            Remaining Uploads
+          </p>
+
+          <h3 className="text-4xl font-bold mt-3 text-blue-500">
+            {remainingUploads}
+          </h3>
+
+          <p
+            className={`text-sm mt-2 ${
+              darkMode ? "text-slate-400" : "text-slate-500"
+            }`}
+          >
+            Available in your current plan
+          </p>
+
+          <button
+            onClick={() => upgradePlan("MONTHLY")}
+            className="mt-5 px-6 py-3 rounded-xl
+                       bg-blue-600 hover:bg-blue-700
+                       text-white font-medium
+                       transition-all duration-200
+                       shadow-sm hover:shadow-md"
+          >
+            Upgrade Now
+          </button>
+
+        </div>
 
       </div>
 
-      <p className="text-slate-400 mt-3">
-        {subscription
-? `${Math.round(
-(subscription.uploads_used /
-subscription.uploads_limit) *
-100
-)}% Used`
-: "0% Used"}
-      </p>
 
-    </div>
-
-    {/* REMAINING */}
-
-    <div>
-
-      <p className="text-slate-400">
-        Remaining Uploads
-      </p>
-
-      <h3 className="text-4xl font-bold mt-2 text-blue-500">
-        {subscription
-  ? subscription.uploads_limit - subscription.uploads_used
-  : 0}
-      </h3>
-
-      <button
-        onClick={() => upgradePlan("MONTHLY")}
-        className="mt-6 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition"
+      {/* ================= PLAN BENEFITS ================= */}
+      <div
+        className={`mt-8 rounded-2xl border p-6 ${
+          darkMode
+    ? "bg-slate-900 border-slate-700"
+    : "bg-white border-slate-200"
+        }`}
       >
-        Upgrade Now
-      </button>
+
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+
+          <div>
+
+            <h3
+              className={`text-lg font-semibold ${
+                darkMode ? "text-white" : "text-slate-900"
+              }`}
+            >
+              What's included in your plan?
+            </h3>
+
+            <p
+              className={`text-sm mt-1 ${
+                darkMode ? "text-slate-400" : "text-slate-500"
+              }`}
+            >
+              Get more from ResumeIQ AI with your current subscription.
+            </p>
+
+          </div>
+
+
+          {/* FEATURES */}
+<div className="flex flex-wrap gap-3">
+
+  <div
+    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl
+      border text-sm font-medium
+      ${
+        darkMode
+          ? "bg-slate-800 border-slate-700 text-slate-200"
+          : "bg-white border-slate-200 text-slate-700 shadow-sm"
+      }`}
+  >
+    <span
+      className={`flex items-center justify-center w-5 h-5 rounded-full
+        text-xs font-bold
+        ${
+          darkMode
+            ? "bg-blue-500/20 text-blue-400"
+            : "bg-blue-50 text-blue-600"
+        }`}
+    >
+      ✓
+    </span>
+
+    AI Resume Screening
+  </div>
+
+
+  <div
+    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl
+      border text-sm font-medium
+      ${
+        darkMode
+          ? "bg-slate-800 border-slate-700 text-slate-200"
+          : "bg-white border-slate-200 text-slate-700 shadow-sm"
+      }`}
+  >
+    <span
+      className={`flex items-center justify-center w-5 h-5 rounded-full
+        text-xs font-bold
+        ${
+          darkMode
+            ? "bg-blue-500/20 text-blue-400"
+            : "bg-blue-50 text-blue-600"
+        }`}
+    >
+      ✓
+    </span>
+
+    Job Matching
+  </div>
+
+
+  <div
+    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl
+      border text-sm font-medium
+      ${
+        darkMode
+          ? "bg-slate-800 border-slate-700 text-slate-200"
+          : "bg-white border-slate-200 text-slate-700 shadow-sm"
+      }`}
+  >
+    <span
+      className={`flex items-center justify-center w-5 h-5 rounded-full
+        text-xs font-bold
+        ${
+          darkMode
+            ? "bg-blue-500/20 text-blue-400"
+            : "bg-blue-50 text-blue-600"
+        }`}
+    >
+      ✓
+    </span>
+
+    Resume Management
+  </div>
+
+</div>
+
+        </div>
+
+      </div>
 
     </div>
 
   </div>
 
-</div>
+
+  {/* YOUR EXISTING PRICING PLANS SECTION
+      STARTS AFTER THIS */}
 
     <Pricing
       darkMode={darkMode}

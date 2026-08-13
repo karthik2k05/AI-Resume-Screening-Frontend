@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+
 import RoleSelectionModal from "./RoleSelectionModal";
 const plans = [
   {
@@ -50,7 +50,7 @@ export default function Pricing({
   currentPlan = "FREE",
   onSubscribe = () => {},
 }) {
-   const navigate = useNavigate();
+   
 
   const [showRoleModal, setShowRoleModal] = useState(false);
 
@@ -93,20 +93,23 @@ export default function Pricing({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.1 }}
-            className={`relative rounded-2xl border p-6 sm:p-8 transition-all duration-300
-            hover:-translate-y-2 hover:shadow-2xl
-            ${
-              plan.popular
-                ? "border-blue-600"
-                : darkMode
-                ? "border-slate-700"
-                : "border-slate-200"
-            }
-            ${
-              darkMode
-                ? "bg-slate-900"
-                : "bg-white"
-            }`}
+
+            
+            className={`relative rounded-2xl border p-6 sm:p-8 
+transition-all duration-300 
+hover:-translate-y-2 hover:shadow-2xl 
+${
+  plan.popular
+    ? "border-blue-500 ring-2 ring-blue-500/20"
+    : darkMode
+    ? "border-slate-700"
+    : "border-slate-200"
+}
+${
+  darkMode
+    ? "bg-slate-900 hover:bg-slate-800"
+    : "bg-white hover:bg-slate-50"
+}`}
           >
 
             {plan.popular && (
@@ -117,27 +120,68 @@ export default function Pricing({
 
             )}
 
-            <h3 className="text-xl sm:text-2xl font-bold mt-4">
-              {plan.title}
-            </h3>
+            <div className="flex items-center justify-between mt-4">
+  <h3
+    className={`text-xl sm:text-2xl font-bold ${
+      darkMode ? "text-white" : "text-slate-900"
+    }`}
+  >
+    {plan.title}
+  </h3>
 
-            <h1 className="text-4xl sm:text-5xl font-bold mt-6">
-              {plan.price}
-            </h1>
+  {plan.title === "Free Trial" && (
+    <span className="text-xs px-3 py-1 rounded-full bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+      Starter
+    </span>
+  )}
 
-            <p className="text-slate-500 mt-2">
-              {plan.period}
-            </p>
+  {plan.title === "Professional" && (
+    <span className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+      Recommended
+    </span>
+  )}
 
-            <ul className="mt-8 space-y-3">
+  {plan.title === "Enterprise" && (
+    <span className="text-xs px-3 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
+      Premium
+    </span>
+  )}
+</div>
 
-              {plan.features.map((item) => (
-                <li key={item}>
-                  ✓ {item}
-                </li>
-              ))}
+            <div className="mt-6 flex items-baseline gap-2">
+  <h1
+    className={`text-4xl sm:text-5xl font-bold ${
+      darkMode ? "text-white" : "text-slate-900"
+    }`}
+  >
+    {plan.price}
+  </h1>
 
-            </ul>
+  <span
+    className={`text-sm sm:text-base ${
+      darkMode ? "text-slate-400" : "text-slate-500"
+    }`}
+  >
+    /{plan.period.trim().toLowerCase()}
+  </span>
+</div>
+
+            <ul className="mt-8 space-y-4">
+  {plan.features.map((item) => (
+    <li
+      key={item}
+      className={`flex items-center gap-3 text-sm sm:text-base ${
+        darkMode ? "text-slate-300" : "text-slate-600"
+      }`}
+    >
+      <span className="flex items-center justify-center w-6 h-6 rounded-full bg-green-500/10 text-green-500 font-bold">
+        ✓
+      </span>
+
+      <span>{item}</span>
+    </li>
+  ))}
+</ul>
           <button
   onClick={() => {
     if (dashboard) {
@@ -174,7 +218,8 @@ export default function Pricing({
     (currentPlan === "YEARLY" && plan.title === "Enterprise")
   )
     ? "Current Plan"
-    : plan.button}
+    : plan.button
+    }
 </button>
 
           </motion.div>
