@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { scoreResumeAgainstJD } from "../../lib/jdMatcher";
 import axios from "axios";
+import { getJobPostings } from "../../services/jobPostingService";
 
 const TOP_N_OPTIONS = [5, 10, 20, "All"];
 const RANK_STYLES = [
@@ -37,6 +38,27 @@ export default function ResumeScreening() {
   const [topN, setTopN] = useState(10);
   const [addedHashes, setAddedHashes] = useState(new Set());
   const [expandedHash, setExpandedHash] = useState(null);
+  const [hrPostings, setHrPostings] = useState([]);
+
+  const fetchHrJobs = async () => {
+  try {
+    const response = await getJobPostings(1, 100, "");
+
+    const jobs = response.data.jobs.map((job) => ({
+      id: job.id,
+      title: job.title,
+      dept: job.department,
+      applicants: job.applicants_count,
+      status: job.status === "open" ? "Open" : "Closed",
+      description: job.description,
+      keySkills: job.required_skills,
+    }));
+
+    setHrPostings(jobs);
+  } catch (error) {
+    console.error("Failed to fetch HR jobs:", error);
+  }
+};
 
   const fetchResumes = async () => {
   try {
@@ -81,24 +103,57 @@ export default function ResumeScreening() {
 
   }
 };
+// Check which resumes are already added to the pipeline
+const fetchPipelineApplications = async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-  useEffect(() => {
-    fetchResumes();
-  }, []);
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL}/api/hr/applications`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // Track pipeline candidates separately for each job
+const pipelineKeys = new Set(
+  response.data.applications.map(
+    (application) =>
+      `${application.job_id}-${application.resume_id}`
+  )
+);
+
+setAddedHashes(pipelineKeys);
+  } catch (error) {
+    console.error("Failed to fetch pipeline applications:", error);
+  }
+};
+
+ // Load resumes, HR jobs, and existing pipeline candidates
+useEffect(() => {
+  fetchResumes();
+  fetchHrJobs();
+  fetchPipelineApplications();
+}, []);
 
   const selectedPosting = useMemo(
-    () => postings.find((p) => p.id === Number(selectedPostingId)) || null,
-    [postings, selectedPostingId]
-  );
-
+  () =>
+    hrPostings.find((p) => p.id === Number(selectedPostingId)) || null,
+  [hrPostings, selectedPostingId]
+);
   // Picking a posting fills the JD box with its description — from
   // there HR can freely edit it, so the filter is never limited to
   // just the posting's preset keywords.
   const handleSelectPosting = (id) => {
-    setSelectedPostingId(id);
-    const posting = postings.find((p) => p.id === Number(id));
-    setJdText(posting?.description || "");
-  };
+  // Show the selected job ID for debugging
+  console.log("Selected Job ID:", id);
+
+  setSelectedPostingId(id);
+  const posting = hrPostings.find((p) => p.id === Number(id));
+  setJdText(posting?.description || "");
+};
 
   // Re-scores every stored resume against whatever's currently in the
   // JD box — nothing is baked in at upload time, so editing the text
@@ -181,20 +236,47 @@ export default function ResumeScreening() {
   }
 };
 
-  const addToPipeline = (entry) => {
-    setCandidates((prev) => [
+ const addToPipeline = async (entry) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    if (!selectedPosting) {
+      alert("Please select a job posting first.");
+      return;
+    }
+
+    await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/hr/applications`,
       {
-        id: Date.now() + Math.random(),
-        name: entry.candidateName,
-        role: selectedPosting ? selectedPosting.title : "General Application",
-        applied: "Just now",
-        score: entry.displayScore,
-        status: "Screening",
+        jobId: selectedPosting.id,
+        resumeId: entry.resume_id,
+        matchScore: entry.displayScore,
       },
-      ...prev,
-    ]);
-    setAddedHashes((prev) => new Set(prev).add(entry.hash));
-  };
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+   // Mark this resume as added only for the selected job
+setAddedHashes((prev) => {
+  const updated = new Set(prev);
+  updated.add(`${selectedPosting.id}-${entry.resume_id}`);
+  return updated;
+});
+
+    alert("Candidate added to pipeline successfully.");
+
+  } catch (error) {
+    console.error("ADD TO PIPELINE ERROR:", error);
+
+    alert(
+      error.response?.data?.message ||
+      "Failed to add candidate to pipeline."
+    );
+  }
+};
 
   const removeEntry = async (resumeId) => {
   try {
@@ -304,7 +386,7 @@ const handleClearAll = async () => {
               }`}
             >
               <option value="">Choose a posting to auto-fill its description...</option>
-              {postings.map((p) => (
+              {hrPostings.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.title} — {p.dept}
                 </option>
@@ -395,7 +477,10 @@ const handleClearAll = async () => {
           <h3 className="font-semibold mb-3">Top Candidates</h3>
           <div className="grid sm:grid-cols-3 gap-4">
             {topCandidates.map((entry, idx) => {
-              const added = addedHashes.has(entry.hash);
+              // Check pipeline status for the selected job and resume
+const added = addedHashes.has(
+  `${selectedPosting?.id}-${entry.resume_id}`
+);
               return (
                 <div key={entry.hash} className={`rounded-2xl border p-5 ${cardBg}`}>
                   <div className="flex items-center justify-between mb-3">
@@ -474,7 +559,10 @@ const handleClearAll = async () => {
               </thead>
               <tbody>
                 {tableRows.map((entry, idx) => {
-                  const added = addedHashes.has(entry.hash);
+                  // Check pipeline status for the selected job and resume
+const added = addedHashes.has(
+  `${selectedPosting?.id}-${entry.resume_id}`
+);
                   const expanded = expandedHash === entry.hash;
                   return (
                     <Fragment key={entry.hash}>
