@@ -61,7 +61,7 @@ export default function Applications() {
     return applications.filter((application) => {
       const matchesSearch =
         !q ||
-        application.job_title?.toLowerCase().includes(q) ||
+        application.title?.toLowerCase().includes(q) ||
         application.status?.toLowerCase().includes(q);
 
       const matchesFilter =
@@ -451,17 +451,21 @@ export default function Applications() {
       </div>
 
       <div>
-        <p className={`text-sm ${mutedText}`}>
-          Applied on{" "}
-          {new Date(
-            application.applied_at
-          ).toLocaleDateString(undefined, {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })}
-        </p>
-      </div>
+  <p className="text-sm font-semibold">
+    {application.title}
+  </p>
+
+  <p className={`text-xs mt-1 ${mutedText}`}>
+    Applied on{" "}
+    {new Date(
+      application.applied_at
+    ).toLocaleDateString(undefined, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })}
+  </p>
+</div>
 
     </div>
 
