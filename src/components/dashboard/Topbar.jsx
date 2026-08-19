@@ -6,6 +6,7 @@ import { searchItems } from "../../data/searchItems";
 import { useLocation } from "react-router-dom";
 import SearchAPI from "../../api/searchApi";
 import socket from "../../services/socket";
+import axios from "axios";
 
 const ROLE_LABELS = {
   admin: "Admin",
@@ -17,6 +18,8 @@ export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searc
   const [notificationCount, setNotificationCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  
   useEffect(() => {
   socket.connect();
 
@@ -75,6 +78,60 @@ export default function Topbar({ darkMode, setDarkMode, role, onMenuClick, searc
     socket.off("new_admin_notification");
     socket.off("new_candidate_notification");
   };
+}, [role]);
+
+// Loads previously saved notifications from the database when the Topbar opens.
+useEffect(() => {
+  const fetchNotifications = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const token = localStorage.getItem("token");
+
+      if (!user?.id || !role) return;
+
+     // Fetch saved notifications for the logged-in user using the JWT token.
+const response = await axios.get(
+  `${import.meta.env.VITE_API_URL}/api/notifications`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
+
+      if (response.data.success) {
+        // Map backend notification data into the format used by the Topbar notification list.
+const formattedNotifications = response.data.notifications
+  .filter((notification) => !notification.is_read)
+  .map((notification) => ({
+    id: notification.id,
+    candidateId: notification.candidate_id || null,
+    username:
+      notification.user_name ||
+      notification.title ||
+      (role === "candidate" ? "Admin" : "Candidate"),
+    message: notification.message,
+    read: notification.is_read,
+    time: new Date(notification.created_at).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  }));
+
+        setNotifications(formattedNotifications);
+
+        setNotificationCount(
+          formattedNotifications.filter(
+            (notification) => !notification.read
+          ).length
+        );
+      }
+    } catch (error) {
+      console.error("Failed to load notifications:", error);
+    }
+  };
+
+  fetchNotifications();
 }, [role]);
   
   const roleLabel = ROLE_LABELS[role] || "Candidate";
@@ -423,11 +480,23 @@ const filteredResults = useMemo(() => {
 )}
       </button>
       {showNotifications && (
-    <div className="absolute right-0 top-12 w-80 bg-white bg-slate-900 border-gray-500 rounded-xl shadow-lg z-50">
+    <div 
+  className={`absolute right-0 top-12 w-80 max-h-[420px] rounded-xl shadow-lg z-50 border overflow-hidden ${
+    darkMode
+      ? "bg-slate-900 border-slate-700 text-white"
+      : "bg-white border-slate-200 text-slate-900"
+  }`}
+>
 
-        <div className="p-3 border-g font-semibold">
-            Notifications
-        </div>
+        <div
+  className={`p-3 border-b font-semibold ${
+    darkMode
+      ? "border-slate-700 text-white"
+      : "border-slate-200 text-slate-900"
+  }`}
+>
+  Notifications
+</div>
 
         {notifications.length === 0 ? (
             <div className="p-4 text-sm text-gray-500">
@@ -437,53 +506,74 @@ const filteredResults = useMemo(() => {
             notifications.map((n) => (
                 <div
     key={n.id}
-    onClick={() => {
+    onClick={async () => {
+  try {
+    const token = localStorage.getItem("token");
 
-        if (role === "admin") {
+    // Save notification as read in the database
+    if (!n.read) {
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/notifications/${n.id}/read`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-  navigate("/dashboard/admin/support", {
-    state: {
-      candidateId: n.candidateId,
-    },
-  });
+      // Update UI after backend succeeds
+      setNotifications((prev) =>
+  prev.filter((item) => item.id !== n.id)
+);
 
-} else {
+      setNotificationCount((prev) =>
+        Math.max(prev - 1, 0)
+      );
+    }
 
-  window.dispatchEvent(
-    new CustomEvent("openLiveChat")
-  );
+    // Existing navigation
+    if (role === "admin") {
+      navigate("/dashboard/admin/support", {
+        state: {
+          candidateId: n.candidateId,
+        },
+      });
+    } else {
+      window.dispatchEvent(
+        new CustomEvent("openLiveChat")
+      );
+    }
 
-}
+    setShowNotifications(false);
 
-        setNotifications(prev =>
-            prev.map(item =>
-                item.id === n.id
-                    ? { ...item, read: true }
-                    : item
-            )
-        );
-
-        setNotificationCount(prev =>
-            Math.max(prev - 1, 0)
-        );
-
-        setShowNotifications(false);
-    }}
-    className={`p-1 cursor-pointer hover:bg-blue-100 dark:hover:bg-slate-400 ${
-        !n.read ? "bg-blue-500 dark:bg-slate-200" : ""
-    }`}
+  } catch (error) {
+    console.error(
+      "Failed to mark notification as read:",
+      error
+    );
+  }
+}}
+    className={`p-3 cursor-pointer border-b transition-colors ${
+  darkMode
+    ? `border-slate-700 hover:bg-slate-800 ${
+        !n.read ? "bg-slate-800" : ""
+      }`
+    : `border-slate-100 hover:bg-blue-50 ${
+        !n.read ? "bg-blue-50" : ""
+      }`
+}`}
 >
                     <div className="font-semibold">
                         {n.username}
                     </div>
 
-                    <div className="text-sm text-gray-500">
-  {role === "admin"
-    ? `${n.username} sent you a message`
-    : "Admin replied to your message"}
+                    <div className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-500"}`}>
+  {/* Display the actual notification message returned by the backend. */}
+  {n.message}
 </div>
 
-                    <div className="text-xs text-gray-400">
+                    <div className={`text-sm ${darkMode ? "text-slate-300" : "text-slate-500"}`}>
                         {n.time}
                     </div>
                 </div>
