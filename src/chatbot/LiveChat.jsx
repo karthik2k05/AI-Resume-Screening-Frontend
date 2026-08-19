@@ -141,8 +141,16 @@ export default function LiveChat({ onBack, darkMode }) {
 
     if (showThankYou) {
   return (
-    <div className="h-[520px] flex items-center justify-center bg-gray-100">
-      <div className="bg-white rounded-xl shadow-lg p-8 w-[400px] text-center">
+    <div
+  className={`h-[520px] flex items-center justify-center ${
+    darkMode ? "bg-slate-800" : "bg-gray-100"
+  }`}
+>
+      <div
+  className={`rounded-xl shadow-lg p-8 w-[400px] text-center ${
+    darkMode ? "bg-slate-900 text-white" : "bg-white text-gray-900"
+  }`}
+>
 
         <div className="text-6xl mb-4">✅</div>
 
@@ -150,11 +158,11 @@ export default function LiveChat({ onBack, darkMode }) {
           Thank You!
         </h2>
 
-        <p className="text-gray-600 mt-4">
+        <p className={`mt-4 ${darkMode ? "text-gray-300" : "text-gray-600"}`}>
           Your feedback has been submitted successfully.
         </p>
 
-        <p className="text-gray-500 mt-2">
+        <p className={`mt-2 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
           We appreciate your valuable feedback.
         </p>
 
@@ -172,18 +180,36 @@ export default function LiveChat({ onBack, darkMode }) {
 
     if (showFeedback) {
   return (
-    <div className="h-[520px] flex items-center justify-center bg-gray-100">
-      <div className="bg-white rounded-xl shadow-lg p-6 w-[400px]">
+    <div
+  className={`h-[520px] flex items-center justify-center ${
+    darkMode ? "bg-slate-800" : "bg-gray-100"
+  }`}
+>
+      <div
+  className={`rounded-xl shadow-lg p-6 w-[400px] ${
+    darkMode
+      ? "bg-slate-900 text-white"
+      : "bg-white text-gray-900"
+  }`}
+>
 
         <h2 className="text-2xl font-bold text-green-600 text-center">
           Chat Ended
         </h2>
 
-        <p className="text-center text-gray-600 mt-2">
+        <p
+  className={`text-center mt-2 ${
+    darkMode ? "text-gray-300" : "text-gray-600"
+  }`}
+>
           Thank you for contacting our support.
         </p>
 
-        <p className="text-center font-semibold mt-5">
+        <p
+  className={`text-center font-semibold mt-5 ${
+    darkMode ? "text-gray-200" : "text-gray-900"
+  }`}
+>
           How would you rate your experience?
         </p>
 
@@ -195,7 +221,7 @@ export default function LiveChat({ onBack, darkMode }) {
               className={`text-4xl ${
                 rating >= star
                   ? "text-yellow-400"
-                  : "text-gray-300"
+                  : darkMode ? "text-slate-600" : "text-gray-300"
               }`}
             >
               ★
@@ -207,7 +233,11 @@ export default function LiveChat({ onBack, darkMode }) {
           value={comments}
           onChange={(e)=>setComments(e.target.value)}
           placeholder="Additional comments (optional)"
-          className="w-full border rounded-lg mt-6 p-3 resize-none"
+          className={`w-full border rounded-lg mt-6 p-3 resize-none ${
+  darkMode
+    ? "bg-slate-800 text-white placeholder:text-gray-400 border-slate-600"
+    : "bg-white text-gray-900 placeholder:text-gray-500 border-gray-300"
+}`}
           rows={4}
         />
 
@@ -283,14 +313,16 @@ export default function LiveChat({ onBack, darkMode }) {
     msg.sender === "candidate"
       ? "bg-blue-600 text-white"
       : darkMode
-  ? "bg-slate-700 text-white border-slate-600"
-  : "bg-white text-gray-900 border-gray-200"
+  ? "bg-slate-700 text-white border border-slate-600"
+  : "bg-white text-gray-900 border border-gray-200"
   }`}
 >
 
               <p
   className={
     msg.sender === "candidate"
+      ? "text-white"
+      : darkMode
       ? "text-white"
       : "text-gray-900"
   }
@@ -302,6 +334,8 @@ export default function LiveChat({ onBack, darkMode }) {
   className={`text-xs mt-2 text-right ${
     msg.sender === "candidate"
       ? "text-blue-100"
+      : darkMode
+      ? "text-gray-300"
       : "text-gray-500"
   }`}
 >

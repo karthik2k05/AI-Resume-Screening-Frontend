@@ -93,22 +93,10 @@ const [subscription, setSubscription] = useState(null);
   <div className="max-w-7xl mx-auto">
 
   {/* ================= CURRENT SUBSCRIPTION ================= */}
-  <div
-    className={`rounded-3xl border overflow-hidden mb-16 shadow-sm ${
-  darkMode
-    ? "bg-slate-900 border-slate-700"
-    : "bg-white border-slate-200"
-}`}
-  >
+  <div className="mb-16">
 
     {/* HEADER */}
-    <div
-      className={`px-8 py-7 border-b ${
-        darkMode
-    ? "bg-slate-900 border-slate-700"
-    : "bg-white border-slate-200"
-      }`}
-    >
+    <div className="mb-8">
       <div className="flex items-center justify-between">
 
         <div>
@@ -145,7 +133,7 @@ const [subscription, setSubscription] = useState(null);
 
 
     {/* SUBSCRIPTION CONTENT */}
-    <div className="p-8">
+    <div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
@@ -158,13 +146,19 @@ const [subscription, setSubscription] = useState(null);
           }`}
         >
 
-          <p
-            className={`text-sm font-medium ${
-              darkMode ? "text-slate-400" : "text-slate-500"
-            }`}
-          >
-            Current Plan
-          </p>
+          <div className="flex items-start justify-between">
+  <p
+    className={`text-sm font-medium ${
+      darkMode ? "text-slate-400" : "text-slate-500"
+    }`}
+  >
+    Current Plan
+  </p>
+
+  <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
+    <span className="text-blue-500 text-sm">★</span>
+  </div>
+</div>
 
           <h3
             className={`text-4xl font-bold mt-3 ${
@@ -196,21 +190,27 @@ const [subscription, setSubscription] = useState(null);
           }`}
         >
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
 
-            <p
-              className={`text-sm font-medium ${
-                darkMode ? "text-slate-400" : "text-slate-500"
-              }`}
-            >
-              Upload Usage
-            </p>
+  <p
+    className={`text-sm font-medium ${
+      darkMode ? "text-slate-400" : "text-slate-500"
+    }`}
+  >
+    Upload Usage
+  </p>
 
-            <span className="text-xs font-semibold text-blue-500">
-              {isUnlimited ? "UNLIMITED" : `${usagePercent}% USED`}
-            </span>
+  <div className="flex items-center gap-3">
+    <span className="text-xs font-semibold text-blue-500">
+      {isUnlimited ? "UNLIMITED" : `${usagePercent}% USED`}
+    </span>
 
-          </div>
+    <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
+      <span className="text-blue-500 text-sm">↑</span>
+    </div>
+  </div>
+
+</div>
 
           <h3
             className={`text-4xl font-bold mt-3 ${
@@ -260,13 +260,19 @@ const [subscription, setSubscription] = useState(null);
           }`}
         >
 
-          <p
-            className={`text-sm font-medium ${
-              darkMode ? "text-slate-400" : "text-slate-500"
-            }`}
-          >
-            Remaining Uploads
-          </p>
+          <div className="flex items-start justify-between">
+  <p
+    className={`text-sm font-medium ${
+      darkMode ? "text-slate-400" : "text-slate-500"
+    }`}
+  >
+    Remaining Uploads
+  </p>
+
+  <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
+    <span className="text-blue-500 text-sm">✓</span>
+  </div>
+</div>
 
           <h3 className="text-4xl font-bold mt-3 text-blue-500">
             {remainingUploads}
