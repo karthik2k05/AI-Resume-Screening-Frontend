@@ -317,8 +317,7 @@ console.log("HR OVERVIEW RESPONSE:", response.data);
     </div>
   </div>
 
-</div>
-{/* Application Status */}   
+</div> 
 {/* Application Status */}
 <div className={`rounded-2xl border p-5 sm:p-6 ${cardBg}`}>
   <div className="flex items-center justify-between mb-5">
@@ -382,7 +381,7 @@ console.log("HR OVERVIEW RESPONSE:", response.data);
     </div>
 
 
-    {/* Accepted */}
+    {/* Under Review*/}
     <div
       className={`rounded-xl p-4 ${
         darkMode ? "bg-emerald-500/10" : "bg-emerald-50"
@@ -392,7 +391,7 @@ console.log("HR OVERVIEW RESPONSE:", response.data);
         <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
 
         <span className="text-xs font-medium text-emerald-600">
-          Accepted
+          Under Review
         </span>
       </div>
 
@@ -400,7 +399,7 @@ console.log("HR OVERVIEW RESPONSE:", response.data);
         {Number(
           overview?.applicationStatus?.find(
             (item) =>
-              item.status?.toLowerCase() === "accepted"
+              item.status?.toLowerCase() === "under review"
           )?.count ?? 0
         )}
       </p>
@@ -414,6 +413,37 @@ console.log("HR OVERVIEW RESPONSE:", response.data);
       </p>
     </div>
 
+    {/* Shortlisted*/}
+    <div
+      className={`rounded-xl p-4 ${
+        darkMode ? "bg-indigo-500/10" : "bg-indigo-50"
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+
+        <span className="text-xs font-medium text-indigo-600">
+  Shortlisted
+</span>
+      </div>
+
+      <p className="text-2xl font-bold mt-3">
+        {Number(
+          overview?.applicationStatus?.find(
+            (item) =>
+              item.status?.toLowerCase() === "shortlisted"
+          )?.count ?? 0
+        )}
+      </p>
+
+      <p
+        className={`text-xs mt-1 ${
+          darkMode ? "text-slate-500" : "text-slate-400"
+        }`}
+      >
+        applications
+      </p>
+    </div>
 
     {/* Rejected */}
     <div
@@ -434,39 +464,6 @@ console.log("HR OVERVIEW RESPONSE:", response.data);
           overview?.applicationStatus?.find(
             (item) =>
               item.status?.toLowerCase() === "rejected"
-          )?.count ?? 0
-        )}
-      </p>
-
-      <p
-        className={`text-xs mt-1 ${
-          darkMode ? "text-slate-500" : "text-slate-400"
-        }`}
-      >
-        applications
-      </p>
-    </div>
-
-
-    {/* Interview */}
-    <div
-      className={`rounded-xl p-4 ${
-        darkMode ? "bg-amber-500/10" : "bg-amber-50"
-      }`}
-    >
-      <div className="flex items-center gap-2">
-        <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-
-        <span className="text-xs font-medium text-amber-600">
-          Interview
-        </span>
-      </div>
-
-      <p className="text-2xl font-bold mt-3">
-        {Number(
-          overview?.applicationStatus?.find(
-            (item) =>
-              item.status?.toLowerCase() === "interview"
           )?.count ?? 0
         )}
       </p>

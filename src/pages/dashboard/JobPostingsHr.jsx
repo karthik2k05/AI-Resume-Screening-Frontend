@@ -81,6 +81,41 @@ export default function JobPostingsHr() {
     }
   };
 
+    // Status changes
+  const updateApplicantStatus = async (applicationId, status) => {
+    try {
+      await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/hr/applications/${applicationId}/status`,
+        { status },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!expandedJob) return;
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/candidate/jobs/${expandedJob}/applicants`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      setApplicants(response.data.applicants);
+    } catch (error) {
+      console.error("Failed to update application status:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Unable to update application status."
+      );
+    }
+  };
+
   useEffect(() => {
     fetchJobs();
   }, [page, limit, searchQuery]);
@@ -343,15 +378,56 @@ export default function JobPostingsHr() {
                     ) : (
                       <div className="space-y-2">
                         {applicants.map((candidate) => (
-                          <div
-                            key={candidate.user_id}
-                            className={`flex items-center gap-2 py-2 border-b last:border-b-0 text-sm ${
-                              darkMode ? "border-slate-800" : "border-slate-200"
-                            }`}
-                          >
-                            👤 {candidate.name}
-                          </div>
-                        ))}
+  <div
+    key={candidate.application_id}
+    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b last:border-b-0 ${
+      darkMode ? "border-slate-800" : "border-slate-200"
+    }`}
+  >
+    <div>
+      <p className="text-sm font-semibold">
+        👤 {candidate.name}
+      </p>
+
+      <p
+        className={`text-xs mt-1 ${
+          darkMode
+            ? "text-slate-500"
+            : "text-slate-400"
+        }`}
+      >
+        Match: {candidate.match_score ?? 0}%
+      </p>
+    </div>
+
+    <div className="relative w-fit">
+  <select
+    value={candidate.status || "Applied"}
+    onChange={(e) =>
+      updateApplicantStatus(
+        candidate.application_id,
+        e.target.value
+      )
+    }
+    className={`appearance-none rounded-lg border pl-3 pr-7 py-2 text-xs font-semibold outline-none ${
+      darkMode
+        ? "bg-slate-800 border-slate-700 text-slate-200"
+        : "bg-white border-slate-300 text-slate-700"
+    }`}
+  >
+    <option value="Applied">Applied</option>
+    <option value="Under Review">Under Review</option>
+    <option value="Shortlisted">Shortlisted</option>
+    <option value="Rejected">Rejected</option>
+  </select>
+
+  <ChevronDown
+    size={14}
+    className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none"
+  />
+</div>
+  </div>
+))}
                       </div>
                     )}
                   </div>

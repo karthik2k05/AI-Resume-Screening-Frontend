@@ -14,5 +14,5 @@ export default function Overview() {
     return <HROverviewSummary darkMode={darkMode} />;
   }
 
-  return <AdminOverviewSummary darkMode={darkMode} />;
+  return <AdminOverviewSummary darkMode={darkMode} role={role} />;
 }
